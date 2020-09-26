@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "ErrorWrap.h"
 #include "FileURL.h"
 
@@ -12,6 +13,40 @@
 
 using namespace file_utils;
 namespace fs = std::filesystem;
+
+TEST(Common, SplitJoin) {
+  std::vector<std::string> sv0 {"qwerty", "asdfgh", "zxcvbn"};
+  std::vector<std::string> sv1 {"qwerty", "", "dsgfj"};
+  std::vector<std::string> sv2 {"qwerty", "", "dsgfj\"hgds"};
+  std::vector<std::string> v;
+
+  // join_container ss0
+  std::stringstream ss0 = join_container(sv0, "");
+  EXPECT_EQ(ss0.str(), "qwertyasdfghzxcvbn");
+  ss0 = join_container(sv0, ',');
+  EXPECT_EQ(ss0.str(), "qwerty,asdfgh,zxcvbn");
+  split_str(ss0.str(), &v, ',');
+  EXPECT_EQ(v.size(), sv0.size());
+  for (size_t i = 0; i < std::min(v.size(), sv0.size()); ++i)
+    EXPECT_EQ(v[i], sv0[i]);
+
+  // join_container ss1
+  std::stringstream ss1 = join_container(sv1, "");
+  EXPECT_EQ(ss1.str(), "qwertydsgfj");
+  ss1 = join_container(sv1, '.');
+  EXPECT_EQ(ss1.str(), "qwerty..dsgfj");
+  v.clear();
+  split_str(ss1.str(), &v, '.');
+  EXPECT_EQ(v.size(), sv1.size());
+  for (size_t i = 0; i < std::min(v.size(), sv1.size()); ++i)
+    EXPECT_EQ(v[i], sv1[i]);
+
+  // join_container ss2
+  std::stringstream ss2 = join_container(sv2, "");
+  EXPECT_EQ(ss2.str(), "qwertydsgfj\"hgds");
+  ss2 = join_container(sv2, " ,");
+  EXPECT_EQ(ss2.str(), "qwerty , ,dsgfj\"hgds");
+}
 
 /**
  * \brief Тест врапера ошибок

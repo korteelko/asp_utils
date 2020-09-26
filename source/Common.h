@@ -14,6 +14,7 @@
 #ifndef _UTILS__COMMON_H_
 #define _UTILS__COMMON_H_
 
+#include <algorithm>
 #include <string>
 #include <sstream>
 
@@ -181,5 +182,26 @@ void split_str(const std::string &str, ContainerT *cont_p, char sep) {
   }
   cont_p->push_back(str.substr(start, std::min(pos, str.size()) - start + 1));
 }
+/**
+ * \brief Слить контейнер данных в строковый поток
+ * \param cont Ссылка на контейнер данных
+ * \param sep Разделитель значений
+ *
+ * \return Строковый поток значений контейнера, разбитых `sep`
+ *
+ * \todo stringstream принимать или не надо - создавать новый?
+ *   Может вообще обобщённую функцию создать с возвратом decltype
+ *   или вообще в строку лупить
+ * */
+ template <class ContainerT, class SeparatorT>
+ std::stringstream join_container(const ContainerT &cont, SeparatorT &&sep) {
+   std::stringstream sstr;
+   if (cont.size()) {
+     sstr << cont[0];
+     std::for_each(std::next(cont.begin()), cont.end(),
+         [&sstr, &sep] (const auto &s) { sstr << sep << s; } );
+   }
+   return sstr;
+ }
 
 #endif  // !_UTILS__COMMON_H_
