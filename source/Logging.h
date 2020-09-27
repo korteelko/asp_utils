@@ -115,6 +115,14 @@ class Logging {
 
 public:
   /**
+   * \brief Инициализировать статические параметры логирования
+   * */
+  Logging();
+  /**
+   * \brief Освободить ресурсы, дропнуть логгеры
+   * */
+  ~Logging();
+  /**
    * \brief Инициализировать систему логирования структурой
    *   logging_cfg с параметрами по умолчанию:
    *   - logger = "main_logger"
@@ -128,10 +136,6 @@ public:
    *   - cerr_duplicate = false
    * */
   static merror_t InitDefault();
-  /**
-   * \brief Освободить ресурсы, дропнуть логгеры
-   * */
-  ~Logging();
   /**
    * \brief Изменить параметры основного логгера
    * */
@@ -246,33 +250,36 @@ public:
    *   true - зарегистрирован
    *   false - не зарегистрирован
    * */
-  static bool Register(const logging_cfg &cfg);
+  bool Register(const logging_cfg &cfg);
   /**
    * \brief Соответствующий переданной конфигурации
    *   логгер уже заристрирован
+   * \param cfg Ссылка на параметры логгера
    *
    * \return Результат проверки
    *   true - зарегистрирован
    *   false - не зарегистрирован
    * */
-  // bool IsRegistered(const logging_cfg &cfg) const;
+  bool IsRegistered(const logging_cfg &cfg) const;
+  /**
+   * \brief Разрегистрировать логгер
+   * */
+  void UnRegister(const logging_cfg &cfg);
   /**
    * \brief Добавить информацию об ошибке и сообщение `msg` к логу
    * */
-  void Append(const std::string &msg);
-
-private:
-  PrivateLogging(const logging_cfg &cfg);
+  void Append(io_loglvl ll, const std::string &logger, const std::string &msg);
 
 private:
   /**
    * \brief Контейнер логгеров(ссылок на них)
+   * \note Можно хранить logging_cfg, но ещё лучше мапу и с тем и другим
    * */
-  static std::set<std::string> loggers_;
+  std::set<std::string> loggers_;
   /**
    * \brief Мьютекс изменения контейнера логгеров
    * */
-  static Mutex loggers_lock_;
+  Mutex loggers_lock_;
 };
 
 #endif  // !UTILS__LOGGING_H
