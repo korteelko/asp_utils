@@ -1,0 +1,26 @@
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      dist: focal
+      compiler: gcc
+
+script:
+  - mkdir -p build
+  - cd build
+  - cmake ${CMAKE_OPTIONS} -DCMAKE_BUILD_TYPE=Debug ..
+  - make
+
+addons:
+  apt:
+    packages:
+      - gcc-10
+      - cmake
+      - lcov
+      - googletest
+    sources:
+      - ubuntu-toolchain-r-test
+
+notifications:
+  email: false

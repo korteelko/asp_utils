@@ -6,7 +6,9 @@ project(${PROJECT_NAME})
 
 add_compile_options(-Wall)
 
-set(CMAKE_BUILD_TYPE Debug)
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
