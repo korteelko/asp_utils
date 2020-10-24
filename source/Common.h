@@ -15,64 +15,64 @@
 #define _UTILS__COMMON_H_
 
 #include <algorithm>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include <stdint.h>
 
-
 #if defined(BYCMAKE_DEBUG)
 /** \brief Режим отладки */
-#  define _DEBUG
+#define _DEBUG
 #endif  // BYCMAKE_DEBUG
 #if defined(BYCMAKE_CXX17)
 /** \brief Использовать стандарт C++17 */
-#  define CXX17
+#define CXX17
 #endif  // BYCMAKE_CXX17
 #if defined(BYCMAKE_WITH_POSTGRESQL)
 /** \brief Использовать библиотеку libpqxx */
-#  define WITH_POSTGRESQL
+#define WITH_POSTGRESQL
 #endif  // BYCMAKE_WITH_POSTGRESQL
 #if defined(BYCMAKE_WITH_PUGIXML)
-#  define WITH_PUGIXML
+#define WITH_PUGIXML
 #endif  // BYCMAKE_WITH_PUGIXML
 #if defined(BYCMAKE_WITH_RAPIDJSON)
-#  define WITH_RAPIDJSON
+#define WITH_RAPIDJSON
 #endif  // BYCMAKE_WITH_RAPIDJSON
 #if defined(BYCMAKE_TESTS_ENABLED)
-#  define TESTS_ENABLED
+#define TESTS_ENABLED
 #endif  // BYCMAKE_TESTS_ENABLED
 
-#if defined (TESTING_PROJECT)
-#  define ADD_TEST_CLASS(x) friend class x;
+// кажется такой подход несколько ломает логику
+#if defined(TESTING_PROJECT)
+#define ADD_TEST_CLASS(x) friend class x;
 #else
-#  define ADD_TEST_CLASS(x)
+#define ADD_TEST_CLASS(x)
 #endif  // TEST_PROJECT
 
 //  math defines
-#define FLOAT_ACCURACY        0.00001
-#define DOUBLE_ACCURACY       0.000000001
+#define FLOAT_ACCURACY 0.00001
+#define DOUBLE_ACCURACY 0.000000001
 
 // status/state defines
 typedef uint32_t mstatus_t;
 /** \brief статус при инициализации */
-#define STATUS_DEFAULT        0x00000001
+#define STATUS_DEFAULT 0x00000001
 /** \brief статус удачного результата операции */
-#define STATUS_OK             0x00000002
+#define STATUS_OK 0x00000002
 /** \brief статус неудачного результата операции */
-#define STATUS_NOT            0x00000003
+#define STATUS_NOT 0x00000003
 /** \brief статус наличия ошибки при выполнении операции */
-#define STATUS_HAVE_ERROR     0x00000004
+#define STATUS_HAVE_ERROR 0x00000004
 
 // logging defines
 /**
  * \brief Уровень логирования релиз сборки
  * */
-#define DEFAULT_LOGLVL        0x01
+#define DEFAULT_LOGLVL 0x01
 /**
  * \brief Уровень логирования отладочной сборки
  * */
-#define DEBUG_LOGLVL          0x0f
+#define DEBUG_LOGLVL 0x0f
 /**
  * \brief Уровни логирования
  * */
@@ -103,14 +103,13 @@ typedef enum {
  * */
 std::string io_loglvl_str(io_loglvl ll);
 
-
 /**
  * \brief Вывести целочисленное значение в шестнадцеричном формате
  * \param hex Приводимое к шестнадцетеричному представлению число
  * \return Строка-представление
  * */
 template <typename Integer,
-    typename = std::enable_if_t<std::is_integral<Integer>::value>>
+          typename = std::enable_if_t<std::is_integral<Integer>::value>>
 std::string hex2str(Integer hex) {
   std::stringstream hex_stream;
   hex_stream << "0x" << std::hex << hex;
@@ -135,15 +134,15 @@ inline bool is_status_ok(mstatus_t status) {
  * \brief Проверить валидность статуса для набора аргументов
  * \return true если для всех аргументов is_status_ok = true
  * */
-template <class ...Targs>
-inline bool is_status_ok(mstatus_t status, Targs ...fargs) {
+template <class... Targs>
+inline bool is_status_ok(mstatus_t status, Targs... fargs) {
   return is_status_ok(status) && is_status_ok(fargs...);
 }
 /**
  * \brief Строка str заканчивается подстрокой ending
  * \brief true Если str заканчивается подстрокой ending
  * */
-inline bool ends_with(const std::string &str, const std::string &ending) {
+inline bool ends_with(const std::string& str, const std::string& ending) {
   if (ending.size() > str.size())
     return false;
   return std::equal(ending.rbegin(), ending.rend(), str.rbegin());
@@ -152,18 +151,18 @@ inline bool ends_with(const std::string &str, const std::string &ending) {
  * \brief Обрезать пробелы с обоих концов
  * \return Строка без начальных и конечных пробелов
  * */
-std::string trim_str(const std::string &str);
+std::string trim_str(const std::string& str);
 /**
  * \brief Проверить что объект файловой системы(файл, директория, соккет,
  *   линк, character_dev) существует
  * \return true если путь path валиден
  * */
-bool is_exists(const std::string &path);
+bool is_exists(const std::string& path);
 /**
  * \brief Вернуть путь к директории содержащей файл
  * \return Путь к директории
  * */
-std::string dir_by_path(const std::string &path);
+std::string dir_by_path(const std::string& path);
 /**
  * \brief Разбить строку по сепаратору 'ch' записать изменения
  *   в контейнер
@@ -172,7 +171,7 @@ std::string dir_by_path(const std::string &path);
  * \param sep Разделитель
  * */
 template <class ContainerT>
-void split_str(const std::string &str, ContainerT *cont_p, char sep) {
+void split_str(const std::string& str, ContainerT* cont_p, char sep) {
   size_t pos = str.find(sep);
   size_t start = 0;
   while (pos != std::string::npos) {
@@ -193,15 +192,15 @@ void split_str(const std::string &str, ContainerT *cont_p, char sep) {
  *   Может вообще обобщённую функцию создать с возвратом decltype
  *   или вообще в строку лупить
  * */
- template <class ContainerT, class SeparatorT>
- std::stringstream join_container(const ContainerT &cont, SeparatorT &&sep) {
-   std::stringstream sstr;
-   if (cont.size()) {
-     sstr << cont[0];
-     std::for_each(std::next(cont.begin()), cont.end(),
-         [&sstr, &sep] (const auto &s) { sstr << sep << s; } );
-   }
-   return sstr;
- }
+template <class ContainerT, class SeparatorT>
+std::stringstream join_container(const ContainerT& cont, SeparatorT&& sep) {
+  std::stringstream sstr;
+  if (cont.size()) {
+    sstr << cont[0];
+    std::for_each(std::next(cont.begin()), cont.end(),
+                  [&sstr, &sep](const auto& s) { sstr << sep << s; });
+  }
+  return sstr;
+}
 
 #endif  // !_UTILS__COMMON_H_

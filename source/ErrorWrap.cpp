@@ -11,17 +11,14 @@
 
 #include "Logging.h"
 
+ErrorWrap::ErrorWrap() : ErrorWrap(ERROR_SUCCESS_T, "") {}
 
-ErrorWrap::ErrorWrap()
-  : ErrorWrap(ERROR_SUCCESS_T, "") {}
+ErrorWrap::ErrorWrap(merror_t error) : ErrorWrap(error, "") {}
 
-ErrorWrap::ErrorWrap(merror_t error)
-  : ErrorWrap(error, "") {}
+ErrorWrap::ErrorWrap(merror_t error, const std::string& msg)
+    : error_(error), msg_(msg), is_logged_(false) {}
 
-ErrorWrap::ErrorWrap(merror_t error, const std::string &msg)
-  : error_(error), msg_(msg), is_logged_(false) {}
-
-merror_t ErrorWrap::SetError(merror_t error, const std::string &msg) {
+merror_t ErrorWrap::SetError(merror_t error, const std::string& msg) {
   if (error_ && !is_logged_)
     LogIt();
   const std::lock_guard<Mutex> up_lock(update_mutex_);
@@ -30,7 +27,7 @@ merror_t ErrorWrap::SetError(merror_t error, const std::string &msg) {
   return error_ = error;
 }
 
-void ErrorWrap::SetErrorMessage(const std::string &msg) {
+void ErrorWrap::SetErrorMessage(const std::string& msg) {
   if (error_)
     msg_ = msg;
 }
@@ -42,7 +39,7 @@ void ErrorWrap::LogIt(io_loglvl lvl) {
       /* наверное стоит всегда лупить `io_loglvl::err_logs`,
        *   ну да ладно */
       Logging::Append(lvl, "Error occurred.\n  err_msg: " + msg_ +
-          "\n  code: " + hex2str(error_));
+                               "\n  code: " + hex2str(error_));
     }
     is_logged_ = true;
   }
@@ -58,6 +55,10 @@ merror_t ErrorWrap::GetErrorCode() const {
 
 std::string ErrorWrap::GetMessage() const {
   return msg_;
+}
+
+const char *ErrorWrap::GetMessagePtr() const noexcept {
+  return msg_.c_str();
 }
 
 bool ErrorWrap::IsLogged() const {

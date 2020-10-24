@@ -23,31 +23,43 @@
 #include "spdlog/spdlog.h"
 
 #include <ctime>
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
-
 /* псевдонимы для пространтв имён spdlog */
 namespace lsinks = spdlog::sinks;
 namespace llevel = spdlog::level;
 
-logging_cfg::logging_cfg(const std::string &logger, io_loglvl ll,
-    const std::string &file, size_t maxlen, uint16_t flush_rate,
-    bool duplicate)
-  : logger(logger), loglvl(ll), filepath(file), maxlen(maxlen),
-    flush_rate_sec(flush_rate), cerr_duplicate(duplicate) {}
+logging_cfg::logging_cfg(const std::string& logger,
+                         io_loglvl ll,
+                         const std::string& file,
+                         size_t maxlen,
+                         uint16_t flush_rate,
+                         bool duplicate)
+    : logger(logger),
+      loglvl(ll),
+      filepath(file),
+      maxlen(maxlen),
+      flush_rate_sec(flush_rate),
+      cerr_duplicate(duplicate) {}
 
-logging_cfg::logging_cfg(const std::string &logger, io_loglvl ll,
-    const std::string &file, bool duplicate)
-  : logging_cfg(logger, ll, file, DEFAULT_MAXLEN_LOGFILE,
-    DEFAULT_FLUSH_RATE, duplicate) {}
+logging_cfg::logging_cfg(const std::string& logger,
+                         io_loglvl ll,
+                         const std::string& file,
+                         bool duplicate)
+    : logging_cfg(logger,
+                  ll,
+                  file,
+                  DEFAULT_MAXLEN_LOGFILE,
+                  DEFAULT_FLUSH_RATE,
+                  duplicate) {}
 
-logging_cfg &logging_cfg::operator=(const logging_cfg &lc) {
+logging_cfg& logging_cfg::operator=(const logging_cfg& lc) {
   if (this != &lc) {
     loglvl = lc.loglvl;
     filepath = lc.filepath;
@@ -58,31 +70,33 @@ logging_cfg &logging_cfg::operator=(const logging_cfg &lc) {
 }
 
 std::string logging_cfg::to_str() const {
-  return "[" + logger + "]\n"
-      "\tfile:" + filepath + "\n"
-      "\tloglevel - " + io_loglvl_str(loglvl) + "\n"
-  ;
+  return "[" + logger +
+         "]\n"
+         "\tfile:" +
+         filepath +
+         "\n"
+         "\tloglevel - " +
+         io_loglvl_str(loglvl) + "\n";
 }
 
-std::ostream &operator<<(std::ostream &out, const logging_cfg &lc) {
+std::ostream& operator<<(std::ostream& out, const logging_cfg& lc) {
   out << lc.to_str();
   return out;
 }
 
-logging_cfg Logging::li_ (
-  "main_logger",
+logging_cfg Logging::li_("main_logger",
 #ifdef _DEBUG
-  io_loglvl::debug_logs,
-  DEFAULT_LOGFILE,
-  DEFAULT_MAXLEN_LOGFILE,
-  DEFAULT_FLUSH_RATE,
-  true
+                         io_loglvl::debug_logs,
+                         DEFAULT_LOGFILE,
+                         DEFAULT_MAXLEN_LOGFILE,
+                         DEFAULT_FLUSH_RATE,
+                         true
 #else
-  io_loglvl::err_logs,
-  DEFAULT_LOGFILE,
-  DEFAULT_MAXLEN_LOGFILE,
-  DEFAULT_FLUSH_RATE,
-  false
+                         io_loglvl::err_logs,
+                         DEFAULT_LOGFILE,
+                         DEFAULT_MAXLEN_LOGFILE,
+                         DEFAULT_FLUSH_RATE,
+                         false
 #endif  // _DEBUG
 );
 ErrorWrap Logging::error_;
@@ -128,7 +142,7 @@ merror_t Logging::InitDefault() {
   return initInstance(nullptr);
 }
 
-merror_t Logging::ResetInstance(const logging_cfg &li) {
+merror_t Logging::ResetInstance(const logging_cfg& li) {
   return initInstance(&li);
 }
 
@@ -162,43 +176,44 @@ io_loglvl Logging::GetLogLevel() {
   return Logging::li_.loglvl;
 }
 
-const char *Logging::GetLogFile() {
+const char* Logging::GetLogFile() {
   return Logging::li_.filepath.c_str();
 }
 
-#if defined (_DEBUG)
-void Logging::PrintCerr(const std::string &info) {
+#if defined(_DEBUG)
+void Logging::PrintCerr(const std::string& info) {
   std::cerr << info << std::endl;
 }
 #endif  // _DEBUG
 
-void Logging::Append(const std::string &msg) {
+void Logging::Append(const std::string& msg) {
   Logging::append(msg);
 }
 
-void Logging::Append(io_loglvl lvl, const std::string &msg) {
+void Logging::Append(io_loglvl lvl, const std::string& msg) {
   Logging::append(lvl, msg);
 }
 
-void Logging::Append(merror_t error_code, const std::string &msg) {
+void Logging::Append(merror_t error_code, const std::string& msg) {
   Logging::Append(Logging::li_.loglvl, error_code, msg);
 }
 
-void Logging::Append(io_loglvl lvl, merror_t error_code,
-    const std::string &msg) {
-  Logging::Append(lvl, "Error occurred.\n\tErr_msg: " +
-      msg + "\n\tCode: " + hex2str(error_code));
+void Logging::Append(io_loglvl lvl,
+                     merror_t error_code,
+                     const std::string& msg) {
+  Logging::Append(lvl, "Error occurred.\n\tErr_msg: " + msg +
+                           "\n\tCode: " + hex2str(error_code));
 }
 
-void Logging::Append(const std::stringstream &sstr) {
+void Logging::Append(const std::stringstream& sstr) {
   Logging::Append(sstr.str());
 }
 
-void Logging::Append(io_loglvl lvl, const std::stringstream &sstr) {
+void Logging::Append(io_loglvl lvl, const std::stringstream& sstr) {
   Logging::Append(lvl, sstr.str());
 }
 
-merror_t Logging::initInstance(const logging_cfg *li) {
+merror_t Logging::initInstance(const logging_cfg* li) {
   std::lock_guard<Mutex> init_lock(Logging::logconfig_mutex_);
   set_cfg(li);
   merror_t error = ERROR_SUCCESS_T;
@@ -217,7 +232,7 @@ merror_t Logging::initInstance(const logging_cfg *li) {
       auto rotating_sink = std::make_shared<lsinks::rotating_file_sink_mt>(
           Logging::li_.filepath, Logging::li_.maxlen, 3);
       // rotating_sink->set_level(set_loglevel(Logging::li_.loglvl));
-      std::vector<spdlog::sink_ptr> sinks {stdout_sink, rotating_sink};
+      std::vector<spdlog::sink_ptr> sinks{stdout_sink, rotating_sink};
       // связываем выводы
       logger = std::make_shared<spdlog::async_logger>(
           Logging::li_.logger, sinks.begin(), sinks.end(),
@@ -239,18 +254,21 @@ merror_t Logging::initInstance(const logging_cfg *li) {
     logger->set_level(set_loglevel(Logging::li_.loglvl));
     spdlog::flush_every(std::chrono::seconds(Logging::li_.flush_rate_sec));
     Logging::is_aval_ = true;
-  } catch (std::bad_alloc &e) {
+  } catch (std::bad_alloc& e) {
     // ошибка bad_alloc фатальна
     std::cerr << "FATAL ERROR: BAD_ALLOCATION. "
-        "LOGGING INSTANCE.\n\tError message:\n" << e.what();
+                 "LOGGING INSTANCE.\n\tError message:\n"
+              << e.what();
     error = error_.SetError(ERROR_PAIR_DEFAULT(ERROR_FILE_LOGGING_ST));
-  } catch (spdlog::spdlog_ex &e) {
+  } catch (spdlog::spdlog_ex& e) {
     std::cerr << "FATAL ERROR: SPDLOG LIBRARY ERROR. "
-        "LOGGING INSTANCE.\n\tError message:\n" << e.what();
+                 "LOGGING INSTANCE.\n\tError message:\n"
+              << e.what();
     error = error_.SetError(ERROR_FILE_LOGGING_ST, "spdlog exception");
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     std::cerr << "FATAL ERROR: UNDEFINED ERROR. "
-        "LOGGING INSTANCE.\n\tError message:\n" << e.what();
+                 "LOGGING INSTANCE.\n\tError message:\n"
+              << e.what();
     error = error_.SetError(ERROR_GENERAL_T, "");
   }
   if (error) {
@@ -260,23 +278,23 @@ merror_t Logging::initInstance(const logging_cfg *li) {
   return error;
 }
 
-void Logging::append(io_loglvl ll, const std::string &msg) {
+void Logging::append(io_loglvl ll, const std::string& msg) {
   if (Logging::is_aval_ && !msg.empty())
     spdlog::log(set_loglevel(ll), msg);
 }
 
-void Logging::append(const std::string &msg) {
+void Logging::append(const std::string& msg) {
   append(Logging::li_.loglvl, msg);
 }
 
-void Logging::set_cfg(const logging_cfg *li) {
+void Logging::set_cfg(const logging_cfg* li) {
   if (li)
     Logging::li_ = *li;
 }
 
-
 /* PrivateLogging */
-bool PrivateLogging::Register(const logging_cfg &cfg) {
+/* todo: метод похож на аналогичный для общего логгера */
+bool PrivateLogging::Register(const logging_cfg& cfg) {
   std::lock_guard<Mutex> append(loggers_lock_);
   bool result = false;
   if (IsRegistered(cfg))
@@ -297,26 +315,31 @@ bool PrivateLogging::Register(const logging_cfg &cfg) {
     spdlog::flush_every(std::chrono::seconds(cfg.flush_rate_sec));
     loggers_.emplace(cfg.logger);
     result = true;
-  } catch (spdlog::spdlog_ex &e) {
-    Logging::Append(io_loglvl::err_logs, "Перехвачено spdlog исключение "
-        "во время попытке зарегистрировать логгер " + cfg.logger);
-    Logging::Append(io_loglvl::err_logs, "Текст ошибки:\n" +
-        std::string(e.what()));
-  } catch (std::exception &e) {
-    Logging::Append(io_loglvl::err_logs, "Перехвачено общее исключение "
-        "во время попытке зарегистрировать логгер " + cfg.logger);
-    Logging::Append(io_loglvl::err_logs, "Текст ошибки:\n" +
-        std::string(e.what()));
+  } catch (spdlog::spdlog_ex& e) {
+    Logging::Append(io_loglvl::err_logs,
+                    "Перехвачено spdlog исключение "
+                    "во время попытке зарегистрировать логгер " +
+                        cfg.logger);
+    Logging::Append(io_loglvl::err_logs,
+                    "Текст ошибки:\n" + std::string(e.what()));
+  } catch (std::exception& e) {
+    Logging::Append(io_loglvl::err_logs,
+                    "Перехвачено общее исключение "
+                    "во время попытке зарегистрировать логгер " +
+                        cfg.logger);
+    Logging::Append(io_loglvl::err_logs,
+                    "Текст ошибки:\n" + std::string(e.what()));
   }
   return result;
 }
 
-bool PrivateLogging::IsRegistered(const logging_cfg &cfg) const {
+bool PrivateLogging::IsRegistered(const logging_cfg& cfg) const {
   return (spdlog::get(cfg.logger).get() != nullptr) ? true : false;
 }
 
-void PrivateLogging::Append(io_loglvl ll, const std::string &logger,
-    const std::string &msg) {
+void PrivateLogging::Append(io_loglvl ll,
+                            const std::string& logger,
+                            const std::string& msg) {
   auto l = spdlog::get(logger);
   if (l.get())
     l->log(set_loglevel(ll), msg);

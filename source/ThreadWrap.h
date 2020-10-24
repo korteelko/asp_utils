@@ -14,24 +14,23 @@
 
 #include <mutex>
 #if defined(CXX17)
-#  include <shared_mutex>
+#include <shared_mutex>
 #endif  // CXX17
-
 
 template <class T>
 class MutexTemplate {
-public:
+ public:
   MutexTemplate() = default;
-  MutexTemplate(const MutexTemplate &) {}
-    // /*mutex_(T())*/ { (void)m; }
+  MutexTemplate(const MutexTemplate&) {}
+  // /*mutex_(T())*/ { (void)m; }
 
-  T &Get() { return mutex_; }
+  T& Get() { return mutex_; }
 
   void lock() { mutex_.lock(); }
   void unlock() { mutex_.unlock(); }
   bool try_lock() { return mutex_.try_lock(); }
 
-public:
+ public:
   T mutex_;
 };
 
@@ -41,15 +40,15 @@ using Mutex = MutexTemplate<std::mutex>;
 using RecursiveMutex = MutexTemplate<std::recursive_mutex>;
 #if defined(CXX17)
 /** \brief Обёртка над разделяемым мьютексом
-  * \note В С++11 его нет, реализовать отвельным классом */
-template<>
+ * \note В С++11 его нет, реализовать отвельным классом */
+template <>
 class MutexTemplate<std::shared_mutex> {
-public:
+ public:
   MutexTemplate() = default;
-  MutexTemplate(const MutexTemplate &) {}
-    // /*mutex_(T())*/ { (void)m; }
+  MutexTemplate(const MutexTemplate&) {}
+  // /*mutex_(T())*/ { (void)m; }
 
-  std::shared_mutex &Get() { return mutex_; }
+  std::shared_mutex& Get() { return mutex_; }
 
   void lock() { mutex_.lock(); }
   void unlock() { mutex_.unlock(); }
@@ -58,7 +57,7 @@ public:
   void lock_shared() { mutex_.lock_shared(); }
   void unlock_shared() { mutex_.unlock_shared(); }
 
-public:
+ public:
   std::shared_mutex mutex_;
 };
 using SharedMutex = MutexTemplate<std::shared_mutex>;
