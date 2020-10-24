@@ -157,6 +157,10 @@ public:
    * \brief Уровень логирования
    * */
   static io_loglvl GetLogLevel();
+  /**
+   * \brief Имя файла логирования
+   * */
+  static const char *GetLogFile();
 #if defined (_DEBUG)
   /**
    * \brief Вывести строку в стандартный вывод ошибок

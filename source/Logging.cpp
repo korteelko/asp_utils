@@ -162,6 +162,10 @@ io_loglvl Logging::GetLogLevel() {
   return Logging::li_.loglvl;
 }
 
+const char *Logging::GetLogFile() {
+  return Logging::li_.filepath.c_str();
+}
+
 #if defined (_DEBUG)
 void Logging::PrintCerr(const std::string &info) {
   std::cerr << info << std::endl;
