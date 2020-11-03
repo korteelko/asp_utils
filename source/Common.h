@@ -24,10 +24,6 @@
 /** \brief Режим отладки */
 #define _DEBUG
 #endif  // BYCMAKE_DEBUG
-#if defined(BYCMAKE_CXX17)
-/** \brief Использовать стандарт C++17 */
-#define CXX17
-#endif  // BYCMAKE_CXX17
 #if defined(BYCMAKE_WITH_POSTGRESQL)
 /** \brief Использовать библиотеку libpqxx */
 #define WITH_POSTGRESQL

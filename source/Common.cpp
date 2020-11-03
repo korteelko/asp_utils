@@ -36,8 +36,6 @@ std::string trim_str(const std::string& str) {
                    .base());
 }
 
-/* todo: add else case */
-#ifdef CXX17
 bool is_exists(const std::string& path) {
   return std::filesystem::exists(path);
 }
@@ -45,4 +43,3 @@ bool is_exists(const std::string& path) {
 std::string dir_by_path(const std::string& path) {
   return std::filesystem::path(path).parent_path();
 }
-#endif  // CXX17

@@ -17,8 +17,6 @@ addons:
     packages:
       - gcc-10
       - cmake
-      - lcov
-      - googletest
     sources:
       - ubuntu-toolchain-r-test
 

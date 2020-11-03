@@ -3,62 +3,58 @@ cmake_minimum_required(VERSION 3.9)
 set(PROJECT_NAME asp_utils)
 project(${PROJECT_NAME})
 
-
-add_compile_options(-Wall)
-
-if(NOT DEFINED CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
-endif()
+set(TARGET_LIB ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_definitions(-DBYCMAKE_CXX17)
+
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(MODULES_DIR ${PROJECT_ROOT}/lib)
 
+# ==============================================================================
 # OPTIONS
+# ==============================================================================
+option(TESTS_ENABLED "Run tests" OFF)
+
+# build type
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DBYCMAKE_DEBUG)
-  message(STATUS "Debug build")
-  option(BUILD_EXAMPLES "Build examples" ON)
-  option(TESTS_ENABLED "Run tests" ON)
-else()
-  message(STATUS "Release build")
-  option(BUILD_EXAMPLES "Build examples" OFF)
-  option(TESTS_ENABLED "Run tests" OFF)
 endif()
+message(STATUS "${PROJECT_NAME} build type: ${CMAKE_BUILD_TYPE}")
 
-#======================================================
+# ==============================================================================
 # SOURCE
-#======================================================
+# ==============================================================================
 set(UTILS_SOURCE
   ${PROJECT_ROOT}/source/Common.cpp
   ${PROJECT_ROOT}/source/ErrorWrap.cpp
   ${PROJECT_ROOT}/source/FileURL.cpp
   ${PROJECT_ROOT}/source/Logging.cpp
 )
-include_directories(${PROJECT_ROOT}/source)
 
-#======================================================
+# ==============================================================================
+# TARGET SETUP
+# ==============================================================================
+add_library(${TARGET_LIB} STATIC ${UTILS_SOURCE})
+
+# ==============================================================================
 # LIBRARIES AND MODULES
-#======================================================
+# ==============================================================================
 #   spdlog
 #   https://github.com/gabime/spdlog.git
 add_subdirectory(${MODULES_DIR}/spdlog)
-include_directories(${MODULES_DIR}/spdlog/include)
+target_include_directories(${TARGET_LIB} PRIVATE ${MODULES_DIR}/spdlog/include)
 
+target_include_directories(${TARGET_LIB} PRIVATE ${PROJECT_ROOT}/source)
+
+target_compile_options(${TARGET_LIB} PRIVATE -Wall)
 #   thread
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-#======================================================
-# OUTPUT SETUP
-#======================================================
-add_library(${PROJECT_NAME} STATIC ${UTILS_SOURCE})
-
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${TARGET_LIB}
 
   stdc++fs
   spdlog
@@ -71,3 +67,4 @@ if(TESTS_ENABLED)
   enable_testing()
   add_subdirectory("${PROJECT_ROOT}/tests")
 endif()
+
