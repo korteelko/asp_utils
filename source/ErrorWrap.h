@@ -16,7 +16,7 @@
  * \note Для разных проектов разные коды ошибок,
  *   поэтому дефайны вынесены в отдельный файл
  *
- * \todo Какое-то плохое решение
+ * \todo Какое-то плохое решение, больше так не делать
  * */
 #if defined(INCLUDE_ERRORCODES)
 #include "merror_codes.h"
@@ -31,7 +31,7 @@
   ("file: " + std::string(__FILE__) + "\n\tfunction: " + \
    std::string(__FUNCTION__) + " line: " + std::to_string(__LINE__) + "\n")
 #else
-#define STRING_DEBUG_INFO ""
+#define STRING_DEBUG_INFO std::string("")
 #endif  // _DEBUG
 
 typedef uint32_t merror_t;

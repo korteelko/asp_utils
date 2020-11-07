@@ -1,6 +1,6 @@
 build/
 docs/
-lib/asp_db
+out/
 soft/
 
 .vs/

@@ -13,9 +13,7 @@
 #include "Common.h"
 
 #include <mutex>
-#if defined(CXX17)
 #include <shared_mutex>
-#endif  // CXX17
 
 template <class T>
 class MutexTemplate {
@@ -38,7 +36,6 @@ class MutexTemplate {
 using Mutex = MutexTemplate<std::mutex>;
 /** \brief Обёртка над рекурсивным мьютексом */
 using RecursiveMutex = MutexTemplate<std::recursive_mutex>;
-#if defined(CXX17)
 /** \brief Обёртка над разделяемым мьютексом
  * \note В С++11 его нет, реализовать отвельным классом */
 template <>
@@ -61,6 +58,6 @@ class MutexTemplate<std::shared_mutex> {
   std::shared_mutex mutex_;
 };
 using SharedMutex = MutexTemplate<std::shared_mutex>;
-#endif  // CXX17
 
 #endif  // !UTILS__THREADWRAP_H
+
