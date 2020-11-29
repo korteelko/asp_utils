@@ -15,6 +15,7 @@
 #define _UTILS__COMMON_H_
 
 #include <algorithm>
+#include <complex>
 #include <sstream>
 #include <string>
 
@@ -198,5 +199,9 @@ std::stringstream join_container(const ContainerT& cont, SeparatorT&& sep) {
   }
   return sstr;
 }
+bool is_equal(double a, double b, double accur = FLOAT_ACCURACY);
+bool is_equal(std::complex<double> a,
+              std::complex<double> b,
+              double accur = FLOAT_ACCURACY);
 
 #endif  // !_UTILS__COMMON_H_

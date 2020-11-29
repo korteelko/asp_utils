@@ -43,3 +43,12 @@ bool is_exists(const std::string& path) {
 std::string dir_by_path(const std::string& path) {
   return std::filesystem::path(path).parent_path();
 }
+
+bool is_equal(double a, double b, double accur) {
+  return (std::abs(a - b) < accur);
+}
+
+bool is_equal(std::complex<double> a, std::complex<double> b, double accur) {
+  return is_equal(a.real(), b.real(), accur) &&
+         is_equal(a.imag(), b.imag(), accur);
+}
