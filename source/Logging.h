@@ -252,7 +252,7 @@ class PrivateLogging {
  public:
   /**
    * \brief Зарегистрировать логгер
-   * \param cfg Конфигурация
+   * \param cfg Конфигурация логгера
    *
    * \return Результат регистрации
    *   true - зарегистрирован
@@ -264,19 +264,31 @@ class PrivateLogging {
    *   логгер уже заристрирован
    * \param cfg Ссылка на параметры логгера
    *
-   * \return Результат проверки
-   *   true - зарегистрирован
-   *   false - не зарегистрирован
+   * \return true Логгер зарегистрирован
+   * \return false Логгер не зарегистрирован
    * */
   bool IsRegistered(const logging_cfg& cfg) const;
   /**
    * \brief Разрегистрировать логгер
+   * \param cfg Конфигурация логгера
    * */
   void UnRegister(const logging_cfg& cfg);
   /**
-   * \brief Добавить информацию об ошибке и сообщение `msg` к логу
+   * \brief Добавить в обработку информацию об ошибке и прилагаемое сообщение
+   *   к конкретному объекту логирования
+   * \param ll Уровень логирования
+   * \param logger Собственное имя объекта логгирования, которому
+   *   необходимо обработать сообщение
+   * \param msg Логируемая информация
    * */
   void Append(io_loglvl ll, const std::string& logger, const std::string& msg);
+  /**
+   * \brief Добавить в обработку информацию об ошибке и прилагаемое сообщение
+   *   ко всем объектам логирования
+   * \param ll Уровень логирования
+   * \param msg Логируемая информация
+   * */
+  void Append(io_loglvl ll, const std::string& msg);
 
  private:
   /**

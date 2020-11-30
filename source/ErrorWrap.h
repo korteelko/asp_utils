@@ -12,15 +12,6 @@
 
 #include "Common.h"
 #include "ThreadWrap.h"
-/**
- * \note Для разных проектов разные коды ошибок,
- *   поэтому дефайны вынесены в отдельный файл
- *
- * \todo Какое-то плохое решение, больше так не делать
- * */
-#if defined(INCLUDE_ERRORCODES)
-#include "merror_codes.h"
-#endif  // INCLUDE_ERRORCODES
 
 #include <string>
 
@@ -34,43 +25,44 @@
 #define STRING_DEBUG_INFO std::string("")
 #endif  // _DEBUG
 
-typedef uint32_t merror_t;
-
-#if not defined(ERROR_SUCCESS_T)
 #define ERROR_SUCCESS_T 0x0000
 #define ERROR_SUCCESS_T_MSG "there are not any errors "
-#endif  // !ERROR_SUCCESS_T
-#if not defined(ERROR_GENERAL_T)
 #define ERROR_GENERAL_T 0x0001
 #define ERROR_GENERAL_T_MSG "general error "
-#endif  // !ERROR_GENERAL_T
 
-/** \brief Подтип ошибок для модулей */
+/**
+ * \brief Подтип ошибок для модулей
+ * */
 #define ERROR_OTHER_MODULE_T 0x000f
 
-/** \brief Составить стандартную пару (код ошибки, соответствующее сообщение) */
+/**
+ * \brief Составить стандартную пару (код ошибки, соответствующее сообщение)
+ * */
 #define ERROR_PAIR_DEFAULT(x) x, x##_MSG
 
-/** \brief ошибка файлового ввода/вывода */
+/**
+ * \brief Ошибка файлового ввода/вывода
+ * */
 #define ERROR_FILEIO_T 0x0002
 #define ERROR_FILEIO_T_MSG "fileio error "
-/** \brief ошибка при работе со строками */
+/**
+ * \brief Ошибка при работе со строками
+ * */
 #define ERROR_STRING_T 0x0004
 #define ERROR_STRING_T_MSG "string processing error "
-/** \brief ошибка инициализации */
+/**
+ * \brief Ошибка инициализации
+ * */
 #define ERROR_INIT_T 0x0005
 #define ERROR_INIT_T_MSG "init struct error "
+
 //   fileio errors
-/** \brief ошибка чтения файла */
 #define ERROR_FILE_IN_ST (0x0100 | ERROR_FILEIO_T)
 #define ERROR_FILE_IN_ST_MSG "input from file error "
-/** \brief ошибка записи в файл */
 #define ERROR_FILE_OUT_ST (0x0200 | ERROR_FILEIO_T)
 #define ERROR_FILE_OUT_ST_MSG "output to file error "
-/** \brief ошибка операции с файлом логирования */
 #define ERROR_FILE_LOGGING_ST (0x0300 | ERROR_FILEIO_T)
 #define ERROR_FILE_LOGGING_ST_MSG "error with logging file "
-/** \brief ошибка существования файла */
 #define ERROR_FILE_EXISTS_ST (0x0400 | ERROR_FILEIO_T)
 #define ERROR_FILE_EXISTS_ST_MSG "parse json error "
 
@@ -91,7 +83,12 @@ typedef uint32_t merror_t;
 #define ERROR_INIT_NULLP_ST_MSG "nullptr value init "
 
 /**
- * \brief класс, в котором инкапсулирована ошибка(код, сообщение,
+ * \brief Тип кода ошибки
+ */
+typedef uint32_t merror_t;
+
+/**
+ * \brief Класс, в котором инкапсулирована ошибка(код, сообщение,
  *   логирована ли, выведелена ли и т.п.)
  * */
 class ErrorWrap {
@@ -107,25 +104,33 @@ class ErrorWrap {
   merror_t SetError(merror_t error, const std::string& msg);
   /**
    * \brief Заменить сообщение об ошибке 'msg_' на 'msg'
+   * \param msg
    * */
   void SetErrorMessage(const std::string& msg);
   /**
-   * \brief Залогировать текущее состояние, если есть ошибка.
-   *   Установить 'is_logged_' в true
-   * \param lvl(optional) Особый логлевел для данного сообщения
-   * \note Здесь и везде Log* методы не константные,
-   *   т.к. в них отслеживается состояние
-   * */
-  void LogIt();
-  /**
-   * \brief Залогировать текущее состояние, если уровень логирования
-   *   состояния программы соответствует переданному уровню логирования
-   *   в аргументах и, собственно говоря, если есть что логировать.
-   *   Установить 'is_logged_' в true
-   *
+   * \brief Залогировать текущее состояние
    * \param lvl Уровень логирования данной ошибки
+   *
+   * Если уровень логирования состояния программы соответствует
+   * переданному уровню логирования в аргументах и, собственно говоря,
+   * если есть что логировать.
+   * Установить 'is_logged_' в true
    * */
-  void LogIt(io_loglvl lvl);
+  void LogIt(io_loglvl lvl = io_loglvl::err_logs);
+  /**
+   * \brief Залогировать текущее состояние
+   * \param pl Ссылка на объект логирования
+   * \param lvl Уровень логирования данной ошибки
+   *
+   * Если уровень логирования состояния программы соответствует
+   * переданному уровню логирования в аргументах и, собственно говоря,
+   * если есть что логировать.
+   * Установить 'is_logged_' в true
+   * */
+  void LogIt(class PrivateLogging& pl, io_loglvl lvl = io_loglvl::err_logs);
+  void LogIt(class PrivateLogging& pl,
+             const std::string& logger,
+             io_loglvl lvl = io_loglvl::err_logs);
   /**
    * \brief Получить код ошибки
    * */
@@ -135,14 +140,10 @@ class ErrorWrap {
    * */
   std::string GetMessage() const;
   /**
-   * \brief Получить указатель на данные сообщения.
-   *
-   * \warning Небезопасный метод, если объект будет уничтожен, а указатель
-   *   ещё где-то висеть будет, неприятная ошибка прокинется, и наверное
-   *   неизвестно где.
-   *   Лучше, конечно, пользовать GetMessage
+   * \brief Создать сообщение об ошибке включающее оригинальное
+   *   сообщение и код ошибки
    * */
-  const char* GetMessagePtr() const noexcept;
+  std::string CreateErrorMessage() const;
   /**
    * \brief Флаг того что сообщение об ошибке уже залогировано
    * */
@@ -156,9 +157,6 @@ class ErrorWrap {
    *   is_logged_ to false
    * */
   void Reset();
-
-  /* DEVELOP: такая перегрузка может стать причиной ментального бо-бо */
-  ErrorWrap& operator=(merror_t) = delete;
 
  private:
   /**

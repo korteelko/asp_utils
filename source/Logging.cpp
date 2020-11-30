@@ -344,3 +344,8 @@ void PrivateLogging::Append(io_loglvl ll,
   if (l.get())
     l->log(set_loglevel(ll), msg);
 }
+
+void PrivateLogging::Append(io_loglvl ll, const std::string& msg) {
+  for (const auto& l : loggers_)
+    Append(ll, l, msg);
+}

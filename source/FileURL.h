@@ -180,7 +180,7 @@ class FileURLRoot {
   };
 
  public:
-  FileURLRoot(const SetupURL& setup);
+  explicit FileURLRoot(const SetupURL& setup);
   FileURLRoot(url_t url_type, const std::string& root);
   /**
    * \brief Инициализация прошла успешно
