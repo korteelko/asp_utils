@@ -20,7 +20,7 @@ if(${GTEST_FOUND})
       -fprofile-arcs -ftest-coverage -Wall)
 
   target_include_directories(${TARGET_UTILS_TESTS}
-    PRIVATE ${PROJECT_ROOT}/source
+    PRIVATE ${PROJECT_ROOT}/include
     PRIVATE ${PROJECT_ROOT}/lib/spdlog/include
     PRIVATE ${GTEST_INCLUDE_DIRS}
   )

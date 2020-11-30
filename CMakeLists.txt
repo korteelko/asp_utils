@@ -25,7 +25,7 @@ target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_17)
 #   https://github.com/gabime/spdlog.git
 add_subdirectory(${MODULES_DIR}/spdlog)
 target_include_directories(${TARGET_UTILS_LIB}
-  PUBLIC ${PROJECT_ROOT}/source
+  PUBLIC ${PROJECT_ROOT}/include
   PRIVATE ${MODULES_DIR}/spdlog/include
 )
 
