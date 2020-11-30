@@ -9,7 +9,9 @@ set(SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(MODULES_DIR ${PROJECT_ROOT}/lib)
 
 message(STATUS "${PROJECT_NAME} build type: ${CMAKE_BUILD_TYPE}")
-option(TESTS_ENABLED "${PROJECT_NAME} option `TESTS_ENABLED`" OFF)
+
+option(BUILD_EXAMPLES "Build examples" ON)
+option(TESTS_ENABLED "Run tests" OFF)
 
 add_library(${TARGET_UTILS_LIB}
   ${PROJECT_ROOT}/source/Common.cpp
@@ -39,6 +41,12 @@ target_link_libraries(${TARGET_UTILS_LIB}
   stdc++fs
   spdlog
 )
+
+# add examples
+if(BUILD_EXAMPLES)
+  message(STATUS "Собираем примеры")
+  add_subdirectory("${PROJECT_ROOT}/examples")
+endif()
 
 # run tests
 if(TESTS_ENABLED)
