@@ -31,21 +31,11 @@
 
 #include <string.h>
 
-/* reader errors */
-#define ERROR_READER_T ERROR_OTHER_MODULE_T
-/** \brief Ошибка несоответствия форматов в json файле */
-#define ERROR_READER_FORMAT_ST (0x0100 | ERROR_READER_T)
-#define ERROR_READER_FORMAT_ST_MSG "reader format error "
-/** \brief Ошибка разбора данных */
-#define ERROR_READER_PARSE_ST (0x0200 | ERROR_READER_T)
-#define ERROR_READER_PARSE_ST_MSG "reader parse error "
-/** \brief Ошибка поиска подузла */
-#define ERROR_READER_CHILD_INIT_ST (0x0300 | ERROR_READER_T)
-#define ERROR_READER_CHILD_INIT_ST_MSG "reader child node error "
-
-/** \brief Представление узла древовидной структуры(json или xml)
+/**
+ * \brief Представление узла древовидной структуры(json или xml)
  *   в той или иной имплементирующей библиотеке
- * \note Можно наверное здесь exceptions попрокидывать */
+ * \note Можно наверное здесь exceptions попрокидывать
+ * */
 template <class NodeT>
 struct lib_node {
   using NodeDocType = void;
@@ -97,7 +87,7 @@ struct lib_node<pugi::xml_node> {
                                          ErrorWrap* ew) {
     pugi::xml_parse_result res = doc->load_buffer_inplace(memory, len);
     if (!res) {
-      ew->SetError(ERROR_READER_FORMAT_ST,
+      ew->SetError(ERROR_PARSER_FORMAT_ST,
                    std::string("pugixml parse error: ") + res.description());
     } else {
       *root_name = doc->begin()->name();
@@ -145,12 +135,12 @@ struct lib_node<rj::Value> {
           return &root->value;
         }
       } else {
-        ew->SetError(ERROR_READER_PARSE_ST,
+        ew->SetError(ERROR_PARSER_PARSE_ST,
                      "ошибка инициализации "
                      "корневого элемента json файла ");
       }
     }
-    ew->SetError(ERROR_READER_FORMAT_ST,
+    ew->SetError(ERROR_PARSER_FORMAT_ST,
                  std::string("RapidJSON parse error: ") +
                      std::string(rj::GetParseError_En(doc->GetParseError())));
     return nullptr;
@@ -404,7 +394,7 @@ class ReaderSample {
           break;
       }
       if (!tmp_node)
-        return ERROR_READER_CHILD_INIT_ST;
+        return ERROR_PARSER_CHILD_NODE_ST;
     }
     *outstr = tmp_node->GetParameter(param);
     return ERROR_SUCCESS_T;

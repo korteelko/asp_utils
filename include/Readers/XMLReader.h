@@ -25,20 +25,10 @@
 
 #include <string.h>
 
-/* json errors */
-#define ERROR_XML_T ERROR_OTHER_MODULE_T
-/** \brief Ошибка несоответствия форматов в json файле */
-#define ERROR_XML_FORMAT_ST (0x0100 | ERROR_XML_T)
-#define ERROR_XML_FORMAT_ST_MSG "xml format error "
-/** \brief Ошибка разбора json данных */
-#define ERROR_XML_PARSE_ST (0x0200 | ERROR_XML_T)
-#define ERROR_XML_PARSE_ST_MSG "xml parse error "
-/** \brief Ошибка поиска подузла */
-#define ERROR_XML_CHILD_INIT_ST (0x0300 | ERROR_XML_T)
-#define ERROR_XML_CHILD_INIT_ST_MSG "xml child node error "
-
-/** \brief шаблон класса дерева файла, стандартная обёртка
- *   над инициализируемой нодой */
+/**
+ * \brief шаблон класса дерева файла, стандартная обёртка
+ *   над инициализируемой нодой
+ * */
 template <class Initializer,
           class InitializerFactory,
           class = typename std::enable_if<
@@ -241,7 +231,7 @@ class XMLReaderSample {
       if (!res) {
         // ошибка разбора документа
         error_.SetError(
-            ERROR_XML_FORMAT_ST,
+            ERROR_PARSER_FORMAT_ST,
             std::string("pugixml parse error: ") + res.description());
       } else {
         pugi::xml_node r = *document_.begin();
@@ -277,7 +267,7 @@ class XMLReaderSample {
           break;
       }
       if (!tmp_node)
-        return ERROR_XML_CHILD_INIT_ST;
+        return ERROR_PARSER_CHILD_NODE_ST;
     }
     *outstr = tmp_node->GetParameter(param);
     return ERROR_SUCCESS_T;

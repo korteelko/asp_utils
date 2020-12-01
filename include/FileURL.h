@@ -96,6 +96,10 @@ class FileURL {
    * */
   merror_t GetError() const;
   /**
+   * \brief Получить состояние объекта
+   * */
+  mstatus_t GetStatus() const;
+  /**
    * \brief Путь отмечен как невалидный
    * */
   bool IsInvalidPath() const;
@@ -129,6 +133,9 @@ inline std::string FileURL::GetURL() const {
 }
 inline merror_t FileURL::GetError() const {
   return error_.GetErrorCode();
+}
+inline mstatus_t FileURL::GetStatus() const {
+  return status_;
 }
 /**
  * \brief Добавить к url файла справа строку `dst`
@@ -191,6 +198,11 @@ class FileURLRoot {
    * \return Объект FileURL указывающий на корневую директорию
    * */
   FileURL GetRootURL() const;
+  /**
+   * \brief Создать NullObject FileURL
+   * \return NullObject FileURL
+   * */
+  FileURL CreateNullObjectURL() const;
   /**
    * \brief Собрать адрес файла по относительному пути
    * \param relative_path Относительный путь

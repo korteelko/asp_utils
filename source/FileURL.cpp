@@ -62,6 +62,12 @@ FileURL FileURLRoot::GetRootURL() const {
   return FileURL(setup_.GetURLType(), setup_.GetFullPrefix());
 }
 
+FileURL FileURLRoot::CreateNullObjectURL() const {
+  FileURL f(setup_.GetURLType(), setup_.GetFullPrefix());
+  f.status_ = STATUS_NOT;
+  return f;
+}
+
 FileURL FileURLRoot::CreateFileURL(const std::string& relative_path) {
   if (is_status_ok(status_)) {
     switch (setup_.GetURLType()) {

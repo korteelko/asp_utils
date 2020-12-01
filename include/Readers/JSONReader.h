@@ -25,23 +25,25 @@
 #include <vector>
 
 /* json errors */
-#define ERROR_JSON_T ERROR_OTHER_MODULE_T
-/** \brief Ошибка несоответствия форматов в json файле */
+#define ERROR_JSON_T 0x0010
+/// Ошибка несоответствия форматов в json файле
 #define ERROR_JSON_FORMAT_ST (0x0100 | ERROR_JSON_T)
 #define ERROR_JSON_FORMAT_ST_MSG "json format error "
-/** \brief Ошибка разбора json данных */
+/// Ошибка разбора json данных
 #define ERROR_JSON_PARSE_ST (0x0200 | ERROR_JSON_T)
 #define ERROR_JSON_PARSE_ST_MSG "json parse error "
-/** \brief Ошибка поиска подузла */
+/// Ошибка поиска подузла
 #define ERROR_JSON_CHILD_INIT_ST (0x0300 | ERROR_JSON_T)
 #define ERROR_JSON_CHILD_INIT_ST_MSG "json child node error "
 
 namespace rj = rapidjson;
 
-/** \brief шаблон класса дерева json файла, стандартная обёртка
+/**
+ * \brief Шаблон класса дерева json файла, стандартная обёртка
  *   над инициализируемой нодой
  * \note такс, для базы это структура 'control_base' или
- *   обёртка над ней: control_base_creator, а скорее всего GUIBase */
+ *   обёртка над ней: control_base_creator, а скорее всего GUIBase
+ * */
 template <class Initializer,
           class InitializerFactory,
           class = typename std::enable_if<

@@ -25,26 +25,26 @@
 #define STRING_DEBUG_INFO std::string("")
 #endif  // _DEBUG
 
-#define ERROR_SUCCESS_T 0x0000
-#define ERROR_SUCCESS_T_MSG "there are not any errors "
-#define ERROR_GENERAL_T 0x0001
-#define ERROR_GENERAL_T_MSG "general error "
-
-/**
- * \brief Подтип ошибок для модулей
- * */
-#define ERROR_OTHER_MODULE_T 0x000f
-
 /**
  * \brief Составить стандартную пару (код ошибки, соответствующее сообщение)
  * */
 #define ERROR_PAIR_DEFAULT(x) x, x##_MSG
+#define ERROR_SUCCESS_T 0x0000
+
+#define ERROR_SUCCESS_T_MSG "there are not any errors "
+#define ERROR_GENERAL_T 0x0001
+#define ERROR_GENERAL_T_MSG "general error "
 
 /**
  * \brief Ошибка файлового ввода/вывода
  * */
 #define ERROR_FILEIO_T 0x0002
 #define ERROR_FILEIO_T_MSG "fileio error "
+/**
+ * \brief Ошибка файлового ввода/вывода
+ * */
+#define ERROR_PARSER_T 0x0003
+#define ERROR_PARSER_T_MSG "parser error "
 /**
  * \brief Ошибка при работе со строками
  * */
@@ -57,14 +57,29 @@
 #define ERROR_INIT_T_MSG "init struct error "
 
 //   fileio errors
+/// Ошибка чтения файла
 #define ERROR_FILE_IN_ST (0x0100 | ERROR_FILEIO_T)
 #define ERROR_FILE_IN_ST_MSG "input from file error "
+/// Ошибка записи в файл
 #define ERROR_FILE_OUT_ST (0x0200 | ERROR_FILEIO_T)
 #define ERROR_FILE_OUT_ST_MSG "output to file error "
+/// Ошибка операции с файлом логирования
 #define ERROR_FILE_LOGGING_ST (0x0300 | ERROR_FILEIO_T)
 #define ERROR_FILE_LOGGING_ST_MSG "error with logging file "
+/// Ошибка существования файла
 #define ERROR_FILE_EXISTS_ST (0x0400 | ERROR_FILEIO_T)
 #define ERROR_FILE_EXISTS_ST_MSG "parse json error "
+
+//   parser errors
+/// Ошибка парсинга файла
+#define ERROR_PARSER_PARSE_ST (0x0100 | ERROR_PARSER_T)
+#define ERROR_PARSER_PARSE_ST_MSG "parse error "
+/// Ошибка несоответствия форматов в файле
+#define ERROR_PARSER_FORMAT_ST (0x0200 | ERROR_PARSER_T)
+#define ERROR_PARSER_FORMAT_ST_MSG "parser format error "
+/// Ошибка обхода дочерних узлов
+#define ERROR_PARSER_CHILD_NODE_ST (0x0300 | ERROR_PARSER_T)
+#define ERROR_PARSER_CHILD_NODE_ST_MSG "child node error "
 
 //   string errors
 #define ERROR_STR_MAX_LEN_ST (0x0100 | ERROR_STRING_T)
@@ -77,8 +92,10 @@
 #define ERROR_STR_TOINT_ST_MSG "convert to int "
 
 //   init errors
+/// Невалидные значения для инициализации
 #define ERROR_INIT_ZERO_ST (0x0100 | ERROR_INIT_T)
 #define ERROR_INIT_ZERO_ST_MSG "zero value init "
+/// NULL значения при инициализации
 #define ERROR_INIT_NULLP_ST (0x0200 | ERROR_INIT_T)
 #define ERROR_INIT_NULLP_ST_MSG "nullptr value init "
 
