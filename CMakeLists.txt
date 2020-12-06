@@ -10,6 +10,8 @@ set(MODULES_DIR ${PROJECT_ROOT}/lib)
 
 message(STATUS "${PROJECT_NAME} build type: ${CMAKE_BUILD_TYPE}")
 
+option(WITH_PUGIXML "Add `pugixml` api and examples" ON)
+option(WITH_RAPIDJSON "Add `rapidjson` api and examples" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" OFF)
 
@@ -30,19 +32,24 @@ target_include_directories(${TARGET_UTILS_LIB}
 
 #   pugixml
 #   https://pugixml.org/
-set(PUGIXML_DIR ${MODULES_DIR}/pugixml)
-target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC PUGIXML_HEADER_ONLY)
-add_subdirectory(${PUGIXML_DIR})
-target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${PUGIXML_DIR}/src)
+if(WITH_PUGIXML)
+  set(PUGIXML_DIR ${MODULES_DIR}/pugixml)
+  target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC PUGIXML_HEADER_ONLY WITH_PUGIXML)
+  target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${PUGIXML_DIR}/src)
+  add_subdirectory(${PUGIXML_DIR})
+endif()
 
 #   rapidjson
 #   http://rapidjson.org/index.html
-set(RAPIDJSON_DIR ${MODULES_DIR}/rapidjson)
-# ! cannot build googletest by source(cmake error)
-set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF CACHE BOOL "Переопределить опцию сборки googletest" FORCE)
-set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Переопределить опцию сборки тестов" FORCE)
-add_subdirectory(${RAPIDJSON_DIR})
-target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${RAPIDJSON_DIR}/include)
+if(WITH_RAPIDJSON)
+  set(RAPIDJSON_DIR ${MODULES_DIR}/rapidjson)
+  # !note: cannot build googletest by source(cmake error)
+  set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF CACHE BOOL "Переопределить опцию сборки googletest" FORCE)
+  set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Переопределить опцию сборки тестов" FORCE)
+  target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${RAPIDJSON_DIR}/include)
+  target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC WITH_RAPIDJSON)
+  add_subdirectory(${RAPIDJSON_DIR})
+endif()
 
 
 # build type
@@ -50,10 +57,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE -D_DEBUG)
 endif()
 
-target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC -DWITH_PUGIXML -DWITH_RAPIDJSON)
-
 find_package(Threads REQUIRED)
-
 target_link_libraries(${TARGET_UTILS_LIB}
   Threads::Threads
   stdc++fs
@@ -63,13 +67,13 @@ target_link_libraries(${TARGET_UTILS_LIB}
 # add examples
 if(BUILD_EXAMPLES)
   message(STATUS "Собираем примеры")
-  add_subdirectory("${PROJECT_ROOT}/examples")
+  add_subdirectory(${PROJECT_ROOT}/examples)
 endif()
 
 # run tests
 if(BUILD_TESTS)
   message(STATUS "Запускаем тесты ${PROJECT_NAME}")
   enable_testing()
-  add_subdirectory("${PROJECT_ROOT}/tests")
+  add_subdirectory(${PROJECT_ROOT}/tests)
 endif()
 
