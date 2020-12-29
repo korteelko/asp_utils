@@ -103,9 +103,10 @@ typedef enum {
  * */
 template <class T>
 struct OptionalSharedPtr {
+  OptionalSharedPtr() : data_(std::nullopt) {}
   OptionalSharedPtr(const std::shared_ptr<T>& data) : data_(data) {}
-  bool has_value() { return data_ != std::nullopt; }
-  T get_data() { return data_.value(); }
+  bool has_value() const { return data_ != std::nullopt; }
+  std::shared_ptr<T> get_data() const { return data_.value(); }
 
  public:
   std::optional<std::shared_ptr<T>> data_ = std::nullopt;
