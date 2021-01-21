@@ -13,7 +13,7 @@ message(STATUS "${PROJECT_NAME} build type: ${CMAKE_BUILD_TYPE}")
 option(WITH_PUGIXML "Add `pugixml` api and examples" ON)
 option(WITH_RAPIDJSON "Add `rapidjson` api and examples" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
-option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_TESTS "Build tests" ON)
 
 add_library(
   ${TARGET_UTILS_LIB}
