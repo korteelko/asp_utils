@@ -15,7 +15,8 @@ option(WITH_RAPIDJSON "Add `rapidjson` api and examples" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" OFF)
 
-add_library(${TARGET_UTILS_LIB}
+add_library(
+  ${TARGET_UTILS_LIB}
   ${PROJECT_ROOT}/source/Common.cpp
   ${PROJECT_ROOT}/source/ErrorWrap.cpp
   ${PROJECT_ROOT}/source/FileURL.cpp
@@ -23,6 +24,7 @@ add_library(${TARGET_UTILS_LIB}
 )
 
 target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_17)
+
 #   spdlog
 #   https://github.com/gabime/spdlog.git
 add_subdirectory(${MODULES_DIR}/spdlog)
@@ -76,4 +78,14 @@ if(BUILD_TESTS)
   enable_testing()
   add_subdirectory(${PROJECT_ROOT}/tests)
 endif()
+
+# генерировать .json файл информации о компилируемых объектниках
+#   compile_commands.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+# скопировать файл compile_commands.json в корень проекта, для работы
+#   синтаксических анализаторов, cppcheck и т.д.
+add_custom_target(
+  copy-compile-commands ALL
+  ${CMAKE_COMMAND} -E copy_if_different
+  ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_LIST_DIR})
 

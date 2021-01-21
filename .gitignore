@@ -3,6 +3,7 @@ docs/
 out/
 soft/
 
+.ccls-cache/
 .vs/
 .vscode/
 
@@ -15,5 +16,6 @@ CMakeLists.txt.user*
 CHANGELOG.md
 HISTORY.md
 
+compile_commands.json
 CMakeSettings.json
 
