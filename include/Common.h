@@ -16,6 +16,8 @@
 
 #include <algorithm>
 #include <complex>
+#include <memory>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -95,6 +97,21 @@ typedef enum {
    * */
   debug_logs = DEBUG_LOGLVL
 } io_loglvl;
+
+/**
+ * \brief Класс optional-обёртка над shared_ptr
+ * */
+template <class T>
+struct OptionalSharedPtr {
+  OptionalSharedPtr() : data_(std::nullopt) {}
+  OptionalSharedPtr(const std::shared_ptr<T>& data) : data_(data) {}
+  bool has_value() const { return data_ != std::nullopt; }
+  std::shared_ptr<T> get_data() const { return data_.value(); }
+
+ public:
+  std::optional<std::shared_ptr<T>> data_ = std::nullopt;
+};
+
 /**
  * \brief Уровень логирования к строковому представлению
  * */

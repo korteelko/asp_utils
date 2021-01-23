@@ -55,6 +55,11 @@
  * */
 #define ERROR_INIT_T 0x0005
 #define ERROR_INIT_T_MSG "init struct error "
+/**
+ * \brief Ошибка типов
+ * */
+#define ERROR_TYPES_T 0x0006
+#define ERROR_TYPES_T_MSG "types error "
 
 //   fileio errors
 /// Ошибка чтения файла
@@ -98,6 +103,10 @@
 /// NULL значения при инициализации
 #define ERROR_INIT_NULLP_ST (0x0200 | ERROR_INIT_T)
 #define ERROR_INIT_NULLP_ST_MSG "nullptr value init "
+
+// types errors
+#define ERROR_TYPES_DYNAMIC_ST (0x0100 | ERROR_TYPES_T)
+#define ERROR_TYPES_DYNAMIC_ST_MSG "dynamic type error "
 
 /**
  * \brief Тип кода ошибки
