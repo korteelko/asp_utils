@@ -13,6 +13,7 @@ if(${GTEST_FOUND})
     ${PROJECT_ROOT}/source/Logging.cpp
     ${PROJECT_FULLTEST_DIR}/test_utils.cpp
     ${PROJECT_FULLTEST_DIR}/test_logging.cpp
+    ${PROJECT_FULLTEST_DIR}/test_nullobject.cpp
   )
   target_compile_features(${TARGET_UTILS_TESTS} PRIVATE cxx_std_17)
   target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE -DBYCMAKE_DEBUG)

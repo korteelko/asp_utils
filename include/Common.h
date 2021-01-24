@@ -74,6 +74,8 @@ typedef uint32_t mstatus_t;
 #define DEBUG_LOGLVL 0x0f
 /**
  * \brief Уровни логирования
+ *
+ * \todo Add 'trace' loglevel
  * */
 typedef enum {
   /**
@@ -96,20 +98,90 @@ typedef enum {
    * \brief Вывод всех сообщений и отладочной информации
    * */
   debug_logs = DEBUG_LOGLVL
+  // trace
 } io_loglvl;
 
 /**
+ * \brief Интерфейс имплементаций паттерна NullObject
+ * \note Можно не наследоваться от этого интерфейса, а использовать
+ *   агрегирующий класс OptionalSharedPtr
+ * */
+struct INullObject {
+ public:
+  virtual ~INullObject() = default;
+  /**
+   * \brief Перегружаемый метод исполнения
+   * */
+  virtual void Perform() = 0;
+};
+
+/**
  * \brief Класс optional-обёртка над shared_ptr
+ * \tparam T Тип данных спрятанный в умный указатель
+ *
+ * Класс представляет собой имплементацию паттерна null object,
+ * с несколько корявой логикой - этот класс обеспечивает
+ * интерфейс для объекта агрегатора для null object, а не сам
+ * null object интерфейс.
  * */
 template <class T>
 struct OptionalSharedPtr {
-  OptionalSharedPtr() : data_(std::nullopt) {}
-  OptionalSharedPtr(const std::shared_ptr<T>& data) : data_(data) {}
+  virtual ~OptionalSharedPtr() = default;
+
+  OptionalSharedPtr() : status_(STATUS_NOT), data_(std::nullopt) {}
+  OptionalSharedPtr(const std::shared_ptr<T>& data)
+      : status_(STATUS_DEFAULT), data_(data) {}
+  template <class... Args>
+  OptionalSharedPtr(Args&&... args)
+      : status_(STATUS_DEFAULT), data_(std::make_shared<T>(args...)) {}
+  /**
+   * \brief Перегружаемый метод воспроизведения действия
+   *   null object объекта.
+   * */
+  virtual void perform() { status_ = STATUS_NOT; }
+  /**
+   * \brief Проверить наличие данных
+   *
+   * \return true если данные есть
+   *         false если значение std::nullopt
+   * */
   bool has_value() const { return data_ != std::nullopt; }
+  /**
+   * \brief Получить указатель на данные
+   *
+   * \throw std::bad_optional_access
+   * \return Умный указатель на данные
+   * */
   std::shared_ptr<T> get_data() const { return data_.value(); }
 
  public:
+  /**
+   * \brief Состояние объекта
+   * */
+  mstatus_t status_;
+  /**
+   * \brief std::optional обёртка над умным указателем на данные
+   * */
   std::optional<std::shared_ptr<T>> data_ = std::nullopt;
+};
+/**
+ * \brief OptionalSharedPtr имплементация для интерфейса NullObject
+ * */
+template <class T,
+          std::enable_if_t<std::is_base_of<INullObject, T>::value, bool> = true>
+struct NullObjectSharedPtr : public OptionalSharedPtr<T> {
+  NullObjectSharedPtr() : OptionalSharedPtr<T>() {}
+  NullObjectSharedPtr(const std::shared_ptr<T>& data)
+      : OptionalSharedPtr<T>(data) {}
+  template <class... Args>
+  NullObjectSharedPtr(Args... args) : OptionalSharedPtr<T>(args...) {}
+  void perform() override {
+    OptionalSharedPtr<T>::status_ = STATUS_NOT;
+    if (OptionalSharedPtr<T>::has_value()) {
+      OptionalSharedPtr<T>::get_data()->Perform();
+      OptionalSharedPtr<T>::status_ = STATUS_OK;
+    }
+  }
 };
 
 /**
