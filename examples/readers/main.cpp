@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "FileURL.h"
 #include "Readers/INode.h"
 #include "Readers/JSONReader.h"
@@ -6,6 +7,7 @@
 #include "inode_imp.h"
 
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 
@@ -17,12 +19,63 @@ fs::path pwd;
 /*
  * todo: генерировать директорию и файлы
  */
-fs::path data_dir = "data";
+fs::path data_dir = "example_data";
 fs::path xml_file = "test_xml.xml";
 fs::path json_file = "test_json.json";
 file_utils::FileURL* x;
 file_utils::FileURL* j;
 
+/**
+ * \brief Создать папку для данных и сгенерировать файлы
+ * */
+void setup_example_data() {
+  fs::path d = pwd / data_dir;
+  fs::path xf = d / xml_file, jf = d / json_file;
+  if (not is_exists(d.string()))
+    fs::create_directory(d);
+  std::ofstream fx(xf);
+  fx << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<test_root name=\"test\">\n"
+        "  <group name=\"first\">\n"
+        "    <parameter name=\"f\"> sda </parameter>\n"
+        "    <parameter name=\"s\"> sdsa </parameter>\n"
+        "    <parameter name=\"t\"> 116.2 </parameter>\n"
+        "    <parameter name=\"ff\">  </parameter>\n"
+        "  </group>\n"
+        "  <group name=\"second\">\n"
+        "    <parameter name=\"f\"> asd </parameter>\n"
+        "    <parameter name=\"s\"> 32 </parameter>\n"
+        "    <parameter name=\"t\"> 12 </parameter>\n"
+        "  </group>\n"
+        "</test_root>\n";
+  fx.close();
+  std::ofstream fy(jf);
+  fy << "{\n"
+        "  \"type\": \"test\",\n"
+        "  \"data\": {\n"
+        "    \"d1\": {\n"
+        "      \"type\": \"first\",\n"
+        "      \"data\": {\n"
+        "        \"f\": \"sda\",\n"
+        "        \"s\": \"sdsa\",\n"
+        "        \"t\": 116.2,\n"
+        "        \"ff\": \"\"\n"
+        "      }\n"
+        "    },\n"
+        "    \"d2\": {\n"
+        "      \"type\": \"second\",\n"
+        "      \"data\": {\n"
+        "        \"f\": \"asd\",\n"
+        "        \"s\": 32,\n"
+        "        \"t\": 12\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        "}\n";
+  fy.close();
+}
+
+/// unused
 int xml() {
   json_test_factory tf;
   std::unique_ptr<
@@ -33,6 +86,7 @@ int xml() {
   return 0;
 }
 
+/// unused
 int json() {
   json_test_factory tf;
   std::unique_ptr<
@@ -63,6 +117,7 @@ int reader() {
 int main(int argc, char* argv[]) {
   Logging::InitDefault();
   pwd = fs::current_path();
+  setup_example_data();
   file_utils::SetupURL s(file_utils::url_t::fs_path, (pwd / data_dir).string());
   file_utils::FileURLRoot r(s);
   file_utils::FileURL sx = r.CreateFileURL(xml_file.string());
