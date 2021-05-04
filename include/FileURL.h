@@ -214,7 +214,7 @@ class FileURLRoot {
    * \brief Список файлов в директории
    * \todo можно добавить относительный путь и глубину обхода(сейчас 1)
    * */
-  ContentContainer GetContent();
+  // ContentContainer GetContent();
 
  private:
   /**

@@ -31,13 +31,13 @@ file_utils::FileURL* j;
 void setup_example_data() {
   fs::path d = pwd / data_dir;
   fs::path xf = d / xml_file, jf = d / json_file;
-  if (not is_exists(d.string()))
+  if (!is_exists(d.string()))
     fs::create_directory(d);
   std::ofstream fx(xf);
   fx << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<test_root name=\"test\">\n"
         "  <group name=\"first\">\n"
-        "    <parameter name=\"f\"> sda </parameter>\n"
+        "    <parameter name=\"f\"> тест юникод </parameter>\n"
         "    <parameter name=\"s\"> sdsa </parameter>\n"
         "    <parameter name=\"t\"> 116.2 </parameter>\n"
         "    <parameter name=\"ff\">  </parameter>\n"
@@ -56,7 +56,7 @@ void setup_example_data() {
         "    \"d1\": {\n"
         "      \"type\": \"first\",\n"
         "      \"data\": {\n"
-        "        \"f\": \"sda\",\n"
+        "        \"f\": \"тест юникод\",\n"
         "        \"s\": \"sdsa\",\n"
         "        \"t\": 116.2,\n"
         "        \"ff\": \"\"\n"

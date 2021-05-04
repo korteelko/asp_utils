@@ -41,7 +41,7 @@ bool is_exists(const std::string& path) {
 }
 
 std::string dir_by_path(const std::string& path) {
-  return std::filesystem::path(path).parent_path();
+  return std::filesystem::path(path).parent_path().string();
 }
 
 bool is_equal(double a, double b, double accur) {

@@ -23,7 +23,7 @@ add_library(
   ${PROJECT_ROOT}/source/Logging.cpp
 )
 
-target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_17)
+target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_20)
 
 #   spdlog
 #   https://github.com/gabime/spdlog.git
@@ -62,7 +62,6 @@ endif()
 find_package(Threads REQUIRED)
 target_link_libraries(${TARGET_UTILS_LIB}
   Threads::Threads
-  stdc++fs
   spdlog
 )
 
@@ -79,6 +78,7 @@ if(BUILD_TESTS)
   add_subdirectory(${PROJECT_ROOT}/tests)
 endif()
 
+if(UNIX)
 # генерировать .json файл информации о компилируемых объектниках
 #   compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -88,4 +88,5 @@ add_custom_target(
   copy-compile-commands-asp_utils ALL
   ${CMAKE_COMMAND} -E copy_if_different
   ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_LIST_DIR})
+endif()
 

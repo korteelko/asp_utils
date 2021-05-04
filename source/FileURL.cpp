@@ -80,10 +80,6 @@ FileURL FileURLRoot::CreateFileURL(const std::string& relative_path) {
   return FileURL();
 }
 
-FileURLRoot::ContentContainer FileURLRoot::GetContent() {
-  assert(0);
-}
-
 void FileURLRoot::check_fs_root() {
   // если строка пути к руту не пустая, проверить
   //   чем она заканчивается
