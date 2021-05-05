@@ -9,11 +9,12 @@
 #ifndef UTILS__READER_H
 #define UTILS__READER_H
 
-#include "Common.h"
-#include "ErrorWrap.h"
-#include "FileURL.h"
-#include "INode.h"
-#include "Logging.h"
+#include "asp_utils/Base.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/FileURL.h"
+#include "asp_utils/Logging.h"
+#include "asp_utils/Readers/INode.h"
 #ifdef WITH_PUGIXML
 #include "pugixml.hpp"
 #endif  // WITH_PUGIXML
@@ -30,6 +31,8 @@
 #include <vector>
 
 #include <string.h>
+
+namespace asp_utils {
 
 /**
  * \brief Представление узла древовидной структуры(json или xml)
@@ -105,27 +108,27 @@ struct lib_node<pugi::xml_node> {
 namespace rj = rapidjson;
 /** \brief Представление узла json в rapudjson */
 template <>
-struct lib_node<rj::Value> {
-  using NodeDocType = rj::Document;
+struct lib_node<rjNValue> {
+  using NodeDocType = rjNDocument;
 
  public:
   lib_node() {}
-  lib_node(rj::Value* jn) : data(jn) {}
+  lib_node(rjNValue* jn) : data(jn) {}
 
-  inline rj::Value* GetNodePointer() { return data; }
+  inline rjNValue* GetNodePointer() { return data; }
 
-  rj::Value* GetChild(const char* name) {
+  rjNValue* GetChild(const char* name) {
     auto ch = data->FindMember(name);
     return (ch != data->MemberEnd()) ? &ch->value : nullptr;
   }
 
-  static bool IsInitialized(const rj::Value* xn) { return xn != nullptr; }
+  static bool IsInitialized(const rjNValue* xn) { return xn != nullptr; }
 
-  static rj::Value* InitDocumentRoot(rj::Document* doc,
-                                     char* memory,
-                                     size_t,
-                                     std::string* root_name,
-                                     ErrorWrap* ew) {
+  static rjNValue* InitDocumentRoot(rjNDocument* doc,
+                                    char* memory,
+                                    size_t,
+                                    std::string* root_name,
+                                    ErrorWrap* ew) {
     doc->Parse(memory);
     if (!doc->HasParseError()) {
       if (doc->IsObject()) {
@@ -147,7 +150,7 @@ struct lib_node<rj::Value> {
   }
 
  public:
-  rj::Value* data = nullptr;
+  rjNValue* data = nullptr;
 };
 #endif  // WITH_RAPIDJSON
 
@@ -162,7 +165,7 @@ template <class NodeT,
           class InitializerFactory,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
-class node_sample {
+class node_sample : public BaseObject {
   typedef node_sample<NodeT, Initializer, InitializerFactory> node;
   /** \brief умный указатель на имплементацию node */
   typedef std::unique_ptr<node> node_ptr;
@@ -182,7 +185,7 @@ class node_sample {
   node_sample(lib_node<NodeT> src,
               InitializerFactory* factory,
               const std::string& name)
-      : node_(src), factory(factory), name_(name) {
+      : BaseObject(STATUS_DEFAULT), node_(src), factory(factory), name_(name) {
     init();
   }
 
@@ -280,7 +283,6 @@ class node_sample {
   }
 
  private:
-  ErrorWrap error_;
   /** \brief представление узла */
   lib_node<NodeT> node_;
   /** \brief имя узла */
@@ -306,17 +308,18 @@ class node_sample {
 template <class NodeT,
           class Initializer,
           class InitializerFactory = SimpleInitializerFactory<Initializer>,
+          class PathT = fs::path,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
-class ReaderSample {
+class ReaderSample : public BaseObject {
   ReaderSample(const ReaderSample&) = delete;
   ReaderSample operator=(const ReaderSample&) = delete;
-  typedef ReaderSample<NodeT, Initializer, InitializerFactory> Reader;
+  typedef ReaderSample<NodeT, Initializer, InitializerFactory, PathT> Reader;
   typedef node_sample<NodeT, Initializer, InitializerFactory> node;
 
  public:
-  static ReaderSample<NodeT, Initializer, InitializerFactory>* Init(
-      file_utils::FileURL* source,
+  static ReaderSample<NodeT, Initializer, InitializerFactory, PathT>* Init(
+      file_utils::FileURLSample<PathT>* source,
       InitializerFactory* factory = nullptr) {
     Reader* reader = nullptr;
     if (source) {
@@ -324,7 +327,7 @@ class ReaderSample {
         reader = new Reader(source, factory);
       } else {
         source->SetError(ERROR_FILE_EXISTS_ST,
-                         "File '" + source->GetURL() + "' doesn't exists");
+                         "File '" + source->GetURLStr() + "' doesn't exists");
         source->LogError();
       }
     } else {
@@ -335,7 +338,7 @@ class ReaderSample {
     return reader;
   }
 
-  static ReaderSample<NodeT, Initializer, InitializerFactory>* Init(
+  static ReaderSample<NodeT, Initializer, InitializerFactory, PathT>* Init(
       const char* data,
       InitializerFactory* factory = nullptr) {
     Reader* reader = nullptr;
@@ -420,69 +423,47 @@ class ReaderSample {
 
   std::string GetFileName() { return (source_) ? source_->GetURL() : ""; }
 
-  merror_t GetErrorCode() const { return error_.GetErrorCode(); }
-
-  void LogError() { error_.LogIt(); }
-
  private:
-  ReaderSample(file_utils::FileURL* source, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+  ReaderSample(file_utils::FileURLSample<PathT>* source,
+               InitializerFactory* factory)
+      : BaseObject(STATUS_DEFAULT),
         source_(source),
         memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   ReaderSample(const char* data, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+      : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
         memory_(nullptr),
         factory_(factory) {
     init_memory(data);
   }
-  /** \brief считать файл в память */
+  /**
+   * \brief Считать обрабатываемый файл в память объекта.
+   *
+   * \todo Копии этой функции в каждом ридере, свести к одной имплементации
+   *
+   * Перегрузка функции инициализации памяти для случая
+   *   наличия файла в файловой системе.
+   */
   void init_memory() {
-    std::ifstream fstr(source_->GetURL());
-    if (fstr) {
-      fstr.seekg(0, fstr.end);
-      len_memory_ = fstr.tellg();
-      fstr.seekg(0, fstr.beg);
-      if (len_memory_ > 0) {
-        memory_ = new char[len_memory_];
-        fstr.read(memory_, len_memory_);
-        if (!fstr) {
-          error_.SetError(ERROR_FILE_IN_ST,
-                          "File read error for: " + source_->GetURL());
-          Logging::Append(io_loglvl::err_logs,
-                          "ошибка чтения json файла: "
-                          "из " +
-                              std::to_string(len_memory_) + " байт считано " +
-                              std::to_string(fstr.gcount()));
-        }
-      } else {
-        // ошибка файла
-        error_.SetError(ERROR_FILE_IN_ST,
-                        "File length error for: " + source_->GetURL());
-      }
-    } else {
-      // ошибка открытия файла
-      error_.SetError(ERROR_FILE_EXISTS_ST,
-                      "File open error for: " + source_->GetURL());
-    }
+    const auto content = read_file(source_->GetURL(), error_);
+    init_memory(content.str().c_str());
   }
   /** \brief скопировать данные в память класса */
   void init_memory(const char* data) {
     len_memory_ = strlen(data);
     if (len_memory_ > 0) {
-      memory_ = new char[len_memory_];
+      memory_ = new char[len_memory_ + 1];
+      memset(memory_, 0, len_memory_ + 1);
       strncpy(memory_, data, len_memory_);
     }
   }
 
  private:
-  ErrorWrap error_;
-  mstatus_t status_ = STATUS_DEFAULT;
   /** \brief адрес файла */
-  file_utils::FileURL* source_ = nullptr;
+  file_utils::FileURLSample<PathT>* source_ = nullptr;
   /** \brief буффер памяти файла */
   char* memory_ = nullptr;
   /** \brief величина буффер памяти файла */
@@ -498,5 +479,6 @@ class ReaderSample {
    * \note добавить такое же в XMLReader */
   InitializerFactory* factory_ = nullptr;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__XMLREADER_H

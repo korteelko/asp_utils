@@ -10,18 +10,18 @@
 #ifndef UTILS__INODE_H
 #define UTILS__INODE_H
 
-#include "Common.h"
+#include "asp_utils/Common.h"
 
 #include <string>
 #include <vector>
 
 #include <stdint.h>
 
-
+namespace asp_utils {
 template <class Initializer>
 class SimpleInitializerFactory {
-public:
-  Initializer *GetNodeInitializer() { return new Initializer(); }
+ public:
+  Initializer* GetNodeInitializer() { return new Initializer(); }
 };
 
 // typedef int32_t node_id;
@@ -65,5 +65,6 @@ protected:
     * \note по ним из класса парсера их можно инициализировать */
   inodes_vec subnodes_;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__INODE_H

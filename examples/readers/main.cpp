@@ -1,9 +1,9 @@
-#include "Common.h"
-#include "FileURL.h"
-#include "Readers/INode.h"
-#include "Readers/JSONReader.h"
-#include "Readers/Reader.h"
-#include "Readers/XMLReader.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/FileURL.h"
+#include "asp_utils/Readers/INode.h"
+#include "asp_utils/Readers/JSONReader.h"
+#include "asp_utils/Readers/Reader.h"
+#include "asp_utils/Readers/XMLReader.h"
 #include "inode_imp.h"
 
 #include <filesystem>
@@ -13,7 +13,7 @@
 
 #include <assert.h>
 
-namespace fs = std::filesystem;
+using namespace asp_utils;
 
 fs::path pwd;
 /*
@@ -22,16 +22,17 @@ fs::path pwd;
 fs::path data_dir = "example_data";
 fs::path xml_file = "test_xml.xml";
 fs::path json_file = "test_json.json";
-file_utils::FileURL* x;
-file_utils::FileURL* j;
+file_utils::FileURLSample<fs::path>* x;
+file_utils::FileURLSample<fs::path>* j;
 
 /**
  * \brief Создать папку для данных и сгенерировать файлы
  * */
 void setup_example_data() {
+  ErrorWrap error;
   fs::path d = pwd / data_dir;
   fs::path xf = d / xml_file, jf = d / json_file;
-  if (!is_exists(d.string()))
+  if (!fs::exists(d))
     fs::create_directory(d);
   std::ofstream fx(xf);
   fx << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -89,9 +90,8 @@ int xml() {
 /// unused
 int json() {
   json_test_factory tf;
-  std::unique_ptr<
-      JSONReaderSample<json_test_node<rj::Value>, json_test_factory>>
-      ss(JSONReaderSample<json_test_node<rj::Value>, json_test_factory>::Init(
+  std::unique_ptr<JSONReaderSample<json_test_node<rjNValue>, json_test_factory>>
+      ss(JSONReaderSample<json_test_node<rjNValue>, json_test_factory>::Init(
           j, &tf));
   merror_t error = ss->InitData();
   return 0;
@@ -107,8 +107,8 @@ int reader() {
   merror_t e = ss->InitData();
   // json
   std::unique_ptr<
-      ReaderSample<rj::Value, json_test_node<rj::Value>, json_test_factory>>
-      sj(ReaderSample<rj::Value, json_test_node<rj::Value>,
+      ReaderSample<rjNValue, json_test_node<rjNValue>, json_test_factory>>
+      sj(ReaderSample<rjNValue, json_test_node<rjNValue>,
                       json_test_factory>::Init(j, &tf));
   e = sj->InitData();
   return 1;
@@ -118,10 +118,11 @@ int main(int argc, char* argv[]) {
   Logging::InitDefault();
   pwd = fs::current_path();
   setup_example_data();
-  file_utils::SetupURL s(file_utils::url_t::fs_path, (pwd / data_dir).string());
-  file_utils::FileURLRoot r(s);
-  file_utils::FileURL sx = r.CreateFileURL(xml_file.string());
-  file_utils::FileURL sj = r.CreateFileURL(json_file.string());
+  file_utils::SetupURLSample<fs::path> s(file_utils::url_t::fs_path,
+                                         (pwd / data_dir));
+  file_utils::FileURLRootSample<fs::path> r(s);
+  file_utils::FileURLSample sx = r.CreateFileURL(xml_file);
+  file_utils::FileURLSample sj = r.CreateFileURL(json_file);
   x = &sx;
   j = &sj;
   // xml();

@@ -9,11 +9,12 @@
 #ifndef UTILS__XMLREADER_H
 #define UTILS__XMLREADER_H
 
-#include "Common.h"
-#include "ErrorWrap.h"
-#include "FileURL.h"
-#include "INode.h"
-#include "Logging.h"
+#include "asp_utils/Base.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/FileURL.h"
+#include "asp_utils/Logging.h"
+#include "asp_utils/Readers/INode.h"
 
 #include "pugixml.hpp"
 
@@ -25,6 +26,7 @@
 
 #include <string.h>
 
+namespace asp_utils {
 /**
  * \brief шаблон класса дерева файла, стандартная обёртка
  *   над инициализируемой нодой
@@ -56,7 +58,7 @@ class xml_node_sample {
   }
 
   xml_node_sample(pugi::xml_node&& src, InitializerFactory* factory)
-      : node_(src), factory(factory) {
+      : BaseObject(STATUS_DEFAULT), node_(src), factory(factory) {
     init();
   }
 
@@ -174,17 +176,18 @@ class xml_node_sample {
  *   Для случая нашего в рут нодах храняться id родительских элементов */
 template <class Initializer,
           class InitializerFactory = SimpleInitializerFactory<Initializer>,
+          class PathT = fs::path,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
-class XMLReaderSample {
+class XMLReaderSample : public BaseObject {
   XMLReaderSample(const XMLReaderSample&) = delete;
   XMLReaderSample operator=(const XMLReaderSample&) = delete;
-  typedef XMLReaderSample<Initializer, InitializerFactory> XMLReader;
+  typedef XMLReaderSample<Initializer, InitializerFactory, PathT> XMLReader;
   typedef xml_node_sample<Initializer, InitializerFactory> xml_node;
 
  public:
   static XMLReaderSample<Initializer, InitializerFactory>* Init(
-      file_utils::FileURL* source,
+      file_utils::FileURLSample<PathT>* source,
       InitializerFactory* factory = nullptr) {
     XMLReader* reader = nullptr;
     if (source) {
@@ -192,7 +195,7 @@ class XMLReaderSample {
         reader = new XMLReader(source, factory);
       } else {
         source->SetError(ERROR_FILE_EXISTS_ST,
-                         "File '" + source->GetURL() + "' doesn't exists");
+                         "File '" + source->GetURLStr() + "' doesn't exists");
         source->LogError();
       }
     } else {
@@ -291,22 +294,23 @@ class XMLReaderSample {
     return tmp_node->node_data_ptr.get();
   }
 
-  std::string GetFileName() { return (source_) ? source_->GetURL() : ""; }
+  std::string GetFileName() { return (source_) ? source_->GetURLStr() : ""; }
 
   merror_t GetErrorCode() const { return error_.GetErrorCode(); }
 
   void LogError() { error_.LogIt(); }
 
  private:
-  XMLReaderSample(file_utils::FileURL* source, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+  XMLReaderSample(file_utils::FileURLSample<PathT>* source,
+                  InitializerFactory* factory)
+      : BaseObject(STATUS_DEFAULT),
         source_(source),
         memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   XMLReaderSample(const char* data, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+      : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
         memory_(nullptr),
         factory_(factory) {
@@ -324,33 +328,8 @@ class XMLReaderSample {
   }
   /** \brief считать файл в память */
   void init_memory() {
-    std::ifstream fstr(source_->GetURL());
-    if (fstr) {
-      fstr.seekg(0, fstr.end);
-      len_memory_ = fstr.tellg();
-      fstr.seekg(0, fstr.beg);
-      if (len_memory_ > 0) {
-        memory_ = new char[len_memory_];
-        fstr.read(memory_, len_memory_);
-        if (!fstr) {
-          error_.SetError(ERROR_FILE_IN_ST,
-                          "File read error for: " + source_->GetURL());
-          Logging::Append(io_loglvl::err_logs,
-                          "ошибка чтения json файла: "
-                          "из " +
-                              std::to_string(len_memory_) + " байт считано " +
-                              std::to_string(fstr.gcount()));
-        }
-      } else {
-        // ошибка файла
-        error_.SetError(ERROR_FILE_IN_ST,
-                        "File length error for: " + source_->GetURL());
-      }
-    } else {
-      // ошибка открытия файла
-      error_.SetError(ERROR_FILE_EXISTS_ST,
-                      "File open error for: " + source_->GetURL());
-    }
+    const auto content = read_file(source_->GetURL(), error_);
+    init_memory(content.str().c_str());
   }
   /** \brief скопировать данные в память класса */
   void init_memory(const char* data) {
@@ -362,10 +341,8 @@ class XMLReaderSample {
   }
 
  private:
-  ErrorWrap error_;
-  mstatus_t status_ = STATUS_DEFAULT;
   /** \brief адрес файла */
-  file_utils::FileURL* source_ = nullptr;
+  file_utils::FileURLSample<PathT>* source_ = nullptr;
   /** \brief буффер памяти файла */
   char* memory_ = nullptr;
   /** \brief величина буффер памяти файла */
@@ -380,5 +357,6 @@ class XMLReaderSample {
    * \note добавить такое же в XMLReader */
   InitializerFactory* factory_ = nullptr;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__XMLREADER_H

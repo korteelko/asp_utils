@@ -7,10 +7,11 @@
  * This library is distributed under the MIT License.
  * See LICENSE file in the project root for full license information.
  */
-#include "ErrorWrap.h"
+#include "asp_utils/ErrorWrap.h"
 
-#include "Logging.h"
+#include "asp_utils/Logging.h"
 
+namespace asp_utils {
 ErrorWrap::ErrorWrap() : ErrorWrap(ERROR_SUCCESS_T, "") {}
 
 ErrorWrap::ErrorWrap(merror_t error) : ErrorWrap(error, "") {}
@@ -74,3 +75,4 @@ void ErrorWrap::Reset() {
   msg_ = "";
   is_logged_ = false;
 }
+}  // namespace asp_utils

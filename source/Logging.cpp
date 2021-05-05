@@ -7,7 +7,7 @@
  * This library is distributed under the MIT License.
  * See LICENSE file in the project root for full license information.
  */
-#include "Logging.h"
+#include "asp_utils/Logging.h"
 
 /*
  * headers of spdlog library
@@ -31,13 +31,14 @@
 #include <stdio.h>
 #include <string.h>
 
+namespace asp_utils {
 /* псевдонимы для пространтв имён spdlog */
 namespace lsinks = spdlog::sinks;
 namespace llevel = spdlog::level;
 
 logging_cfg::logging_cfg(const std::string& logger,
                          io_loglvl ll,
-                         const std::string& file,
+                         const fs::path& file,
                          size_t maxlen,
                          uint16_t flush_rate,
                          bool duplicate)
@@ -50,7 +51,7 @@ logging_cfg::logging_cfg(const std::string& logger,
 
 logging_cfg::logging_cfg(const std::string& logger,
                          io_loglvl ll,
-                         const std::string& file,
+                         const fs::path& file,
                          bool duplicate)
     : logging_cfg(logger,
                   ll,
@@ -73,7 +74,7 @@ std::string logging_cfg::to_str() const {
   return "[" + logger +
          "]\n"
          "\tfile:" +
-         filepath +
+         filepath.string() +
          "\n"
          "\tloglevel - " +
          io_loglvl_str(loglvl) + "\n";
@@ -87,13 +88,13 @@ std::ostream& operator<<(std::ostream& out, const logging_cfg& lc) {
 logging_cfg Logging::li_("main_logger",
 #ifdef _DEBUG
                          io_loglvl::debug_logs,
-                         DEFAULT_LOGFILE,
+                         fs::path(DEFAULT_LOGFILE),
                          DEFAULT_MAXLEN_LOGFILE,
                          DEFAULT_FLUSH_RATE,
                          true
 #else
                          io_loglvl::err_logs,
-                         DEFAULT_LOGFILE,
+                         fs::path(DEFAULT_LOGFILE),
                          DEFAULT_MAXLEN_LOGFILE,
                          DEFAULT_FLUSH_RATE,
                          false
@@ -176,8 +177,8 @@ io_loglvl Logging::GetLogLevel() {
   return Logging::li_.loglvl;
 }
 
-const char* Logging::GetLogFile() {
-  return Logging::li_.filepath.c_str();
+std::string Logging::GetLogFile() {
+  return Logging::li_.filepath.string();
 }
 
 #if defined(_DEBUG)
@@ -230,7 +231,7 @@ merror_t Logging::initInstance(const logging_cfg* li) {
       // stdout_sink->set_level(set_loglevel(Logging::li_.loglvl));
       // файловый ротируемый выход
       auto rotating_sink = std::make_shared<lsinks::rotating_file_sink_mt>(
-          Logging::li_.filepath, Logging::li_.maxlen, 3);
+          Logging::li_.filepath.string(), Logging::li_.maxlen, 3);
       // rotating_sink->set_level(set_loglevel(Logging::li_.loglvl));
       std::vector<spdlog::sink_ptr> sinks{stdout_sink, rotating_sink};
       // связываем выводы
@@ -241,7 +242,7 @@ merror_t Logging::initInstance(const logging_cfg* li) {
       // если в консоль дублировать не нужно, используем обычный
       //   ротируемый асинхронный логгер
       auto rotating_sink = std::make_shared<lsinks::rotating_file_sink_mt>(
-          Logging::li_.filepath, Logging::li_.maxlen, 3);
+          Logging::li_.filepath.string(), Logging::li_.maxlen, 3);
       logger = std::make_shared<spdlog::async_logger>(
           Logging::li_.logger, rotating_sink, spdlog::thread_pool(),
           spdlog::async_overflow_policy::block);
@@ -303,7 +304,7 @@ bool PrivateLogging::Register(const logging_cfg& cfg) {
     Logging::InitDefault();
     std::shared_ptr<spdlog::async_logger> logger = nullptr;
     auto rotating_sink = std::make_shared<lsinks::rotating_file_sink_mt>(
-        cfg.filepath, cfg.maxlen, 3);
+        cfg.filepath.string(), cfg.maxlen, 3);
     logger = std::make_shared<spdlog::async_logger>(
         cfg.logger, rotating_sink, spdlog::thread_pool(),
         spdlog::async_overflow_policy::block);
@@ -349,3 +350,4 @@ void PrivateLogging::Append(io_loglvl ll, const std::string& msg) {
   for (const auto& l : loggers_)
     Append(ll, l, msg);
 }
+}  // namespace asp_utils

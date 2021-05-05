@@ -10,8 +10,8 @@
 #ifndef UTILS__ERRORWRAP_H
 #define UTILS__ERRORWRAP_H
 
-#include "Common.h"
-#include "ThreadWrap.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ThreadWrap.h"
 
 #include <string>
 
@@ -108,6 +108,7 @@
 #define ERROR_TYPES_DYNAMIC_ST (0x0100 | ERROR_TYPES_T)
 #define ERROR_TYPES_DYNAMIC_ST_MSG "dynamic type error "
 
+namespace asp_utils {
 /**
  * \brief Тип кода ошибки
  */
@@ -204,5 +205,6 @@ class ErrorWrap {
    * */
   bool is_logged_;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__ERRORWRAP_H

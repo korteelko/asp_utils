@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 
-#include "Common.h"
-#include "Logging.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/Logging.h"
 
 #include <filesystem>
 
-namespace fs = std::filesystem;
+using namespace asp_utils;
 
 
 /**

@@ -1,6 +1,6 @@
-#include "Common.h"
-#include "ErrorWrap.h"
-#include "FileURL.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/FileURL.h"
 
 #include "gtest/gtest.h"
 
@@ -11,8 +11,8 @@
 #include <assert.h>
 
 
-using namespace file_utils;
-namespace fs = std::filesystem;
+using namespace asp_utils;
+using namespace asp_utils::file_utils;
 
 TEST(Common, SplitJoin) {
   std::vector<std::string> sv0 {"qwerty", "asdfgh", "zxcvbn"};
@@ -78,15 +78,18 @@ TEST(ErrorWrap, Full) {
 
 /**
  * \brief Тест FileURL
+ *
+ * Тест для путей представленных строками, который не реализован
  * */
-TEST(FileURL, Full) {
+TEST(FileURL, DISABLED_Full_string) {
+#ifdef UNDEF
   std::string td = "test_dir";
   std::string tf = "test_file";
   fs::path test_dir(td);
   if (!fs::is_directory(test_dir)) {
     ASSERT_TRUE(fs::create_directory(test_dir));
   }
-  SetupURL setup(url_t::fs_path, td);
+  SetupURLSample setup(url_t::fs_path, td);
   EXPECT_EQ(setup.GetURLType(), url_t::fs_path);
   EXPECT_EQ(setup.GetFullPrefix(), td);
   std::fstream file(td + "/" + tf, std::ios_base::out);
@@ -104,6 +107,40 @@ TEST(FileURL, Full) {
   EXPECT_TRUE(ufile.IsInvalidPath());
 
   EXPECT_TRUE(fs::remove_all(test_dir));
+  #endif  // 0
+}
+
+/**
+ * \brief Тест FileURL
+ *
+ * Тест для путей представленных fs::path
+ * */
+TEST(FileURL, Full_filesystem) {
+  fs::path td = "test_dir";
+  fs::path tf = "test_file";
+  if (!fs::is_directory(td)) {
+    ASSERT_TRUE(fs::create_directory(td));
+  }
+  SetupURLSample<fs::path> setup(url_t::fs_path, td);
+  EXPECT_EQ(setup.GetURLType(), url_t::fs_path);
+  EXPECT_EQ(setup.GetFullPrefix(), td);
+  std::fstream file(td.native() + nstring_ctor(path_separator) + tf.native(), std::ios_base::out);
+  ASSERT_TRUE(file.is_open());
+  file.close();
+  FileURLRootSample<fs::path> uroot(setup);
+  ASSERT_TRUE(uroot.IsInitialized());
+
+  /* file_url */
+  FileURLSample<fs::path> ufile = uroot.CreateFileURL(tf);
+  EXPECT_EQ(ufile.GetError(), ERROR_SUCCESS_T);
+  EXPECT_FALSE(ufile.IsInvalidPath());
+  #ifdef OS_UNIX
+  EXPECT_EQ(ufile.GetURLStr(), "test_dir/test_file");
+  #endif  // OS_UNIX
+  ufile.SetError(ERROR_FILE_OUT_ST, nstring_ctor("Тест ошибки"));
+  EXPECT_TRUE(ufile.IsInvalidPath());
+
+  EXPECT_TRUE(fs::remove_all(td));
 }
 
 int main(int argc, char **argv) {

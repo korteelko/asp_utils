@@ -15,6 +15,7 @@
 #include <mutex>
 #include <shared_mutex>
 
+namespace asp_utils {
 template <class T>
 class MutexTemplate {
  public:
@@ -58,6 +59,7 @@ class MutexTemplate<std::shared_mutex> {
   std::shared_mutex mutex_;
 };
 using SharedMutex = MutexTemplate<std::shared_mutex>;
+}  // namespace asp_utils
 
 #endif  // !UTILS__THREADWRAP_H
 

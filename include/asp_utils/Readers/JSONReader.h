@@ -10,11 +10,12 @@
 #ifndef UTILS__JSONREADER_H
 #define UTILS__JSONREADER_H
 
-#include "Common.h"
-#include "ErrorWrap.h"
-#include "FileURL.h"
-#include "INode.h"
-#include "Logging.h"
+#include "asp_utils/Base.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/FileURL.h"
+#include "asp_utils/Logging.h"
+#include "asp_utils/Readers/INode.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
@@ -38,6 +39,10 @@
 
 namespace rj = rapidjson;
 
+typedef rj::Value rjNValue;
+typedef rj::Document rjNDocument;
+
+namespace asp_utils {
 /**
  * \brief Шаблон класса дерева json файла, стандартная обёртка
  *   над инициализируемой нодой
@@ -65,15 +70,15 @@ class json_node_sample {
    * \note Здесь надо вытащить имя(тип) ноды и прокинуть его
    *   в класс node_t, чтобы тонкости реализации выполнял он
    *   Ну и пока не ясно что делать с иерархичностью */
-  json_node_sample(rj::Value* src,
+  json_node_sample(rjNValue* src,
                    InitializerFactory* factory,
                    const std::string& name)
       : value_(src), factory(factory), name_(name) {
     if (factory) {
       // See C++'03 Standard 14.2/4 or StackOverflow for more
-      //   information about `factory->template GetNodeInitializer<rj::Value>`
+      //   information about `factory->template GetNodeInitializer<rjNValue>`
       node_data_ptr = std::unique_ptr<Initializer>(
-          factory->template GetNodeInitializer<rj::Value>());
+          factory->template GetNodeInitializer<rjNValue>());
       if (!node_data_ptr) {
         error_.SetError(ERROR_GENERAL_T, "Ошибка использования фабрики узлов");
         return;
@@ -110,7 +115,7 @@ class json_node_sample {
     return node_data_ptr->GetParameter(name);
   }
   /** \brief Получить json исходник */
-  rj::Value* GetSource() const { return value_; }
+  rjNValue* GetSource() const { return value_; }
   /** \brief Получить код ошибки */
   merror_t GetError() const { return error_.GetErrorCode(); }
   /** \brief Узел - массив */
@@ -145,7 +150,7 @@ class json_node_sample {
     // если вложенные поддеревья есть - обойдём
     for (const auto& st_name : subtrees) {
       if (value_->HasMember(st_name.c_str())) {
-        rj::Value& chs = value_->operator[](st_name.c_str());
+        rjNValue& chs = value_->operator[](st_name.c_str());
         childs.emplace_back(
             json_node_ptr(new json_node(&chs, factory, st_name)));
       }
@@ -165,7 +170,7 @@ class json_node_sample {
  private:
   ErrorWrap error_;
   /** \brief ссылка на представление ноды в rj */
-  rj::Value* value_;
+  rjNValue* value_;
   /** \brief имя ноды */
   std::string name_;
 
@@ -191,12 +196,13 @@ class json_node_sample {
  *   Для случая нашего в рут нодах храняться id родительских элементов */
 template <class Initializer,
           class InitializerFactory = SimpleInitializerFactory<Initializer>,
+          class PathT = fs::path,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
-class JSONReaderSample {
+class JSONReaderSample : public BaseObject {
   JSONReaderSample(const JSONReaderSample&) = delete;
   JSONReaderSample operator=(const JSONReaderSample&) = delete;
-  typedef JSONReaderSample<Initializer, InitializerFactory> JSONReader;
+  typedef JSONReaderSample<Initializer, InitializerFactory, PathT> JSONReader;
   typedef json_node_sample<Initializer, InitializerFactory> json_node;
 
  public:
@@ -204,11 +210,11 @@ class JSONReaderSample {
    * \note не нравится мне это. Лучше определить в
    *   классе-параметре шаблона */
   // typedef std::function<
-  //    std::vector<std::string> &(const rj::Value &, node_t *)> callback_f;
+  //    std::vector<std::string> &(const rjNValue &, node_t *)> callback_f;
 
  public:
   static JSONReaderSample<Initializer, InitializerFactory>* Init(
-      file_utils::FileURL* source,
+      file_utils::FileURLSample<PathT>* source,
       InitializerFactory* factory = nullptr) {
     JSONReader* reader = nullptr;
     if (source) {
@@ -216,7 +222,7 @@ class JSONReaderSample {
         reader = new JSONReader(source, factory);
       } else {
         source->SetError(ERROR_FILE_EXISTS_ST,
-                         "File '" + source->GetURL() + "' doesn't exists");
+                         "File '" + source->GetURLStr() + "' doesn't exists");
         source->LogError();
       }
     } else {
@@ -269,7 +275,7 @@ class JSONReaderSample {
           error_.SetError(ERROR_JSON_PARSE_ST,
                           "ошибка инициализации "
                           "корневого элемента json файла " +
-                              source_->GetURL());
+                              source_->GetURLStr());
         }
       }
     }
@@ -324,7 +330,7 @@ class JSONReaderSample {
     return tmp_node->node_data_ptr.get();
   }
 
-  std::string GetFileName() { return (source_) ? source_->GetURL() : ""; }
+  std::string GetFileName() { return (source_) ? source_->GetURLStr() : ""; }
 
   merror_t GetErrorCode() const { return error_.GetErrorCode(); }
 
@@ -332,18 +338,19 @@ class JSONReaderSample {
 
   // typedef std::vector<std::string> TreePath;
   /* что-то я хз */
-  // rj::Value &ValueByPath(const TreePath &) {assert(0);}
+  // rjNValue &ValueByPath(const TreePath &) {assert(0);}
 
  private:
-  JSONReaderSample(file_utils::FileURL* source, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+  JSONReaderSample(file_utils::FileURLSample<PathT>* source,
+                   InitializerFactory* factory)
+      : BaseObject(STATUS_DEFAULT),
         source_(source),
         memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   JSONReaderSample(const char* data, InitializerFactory* factory)
-      : status_(STATUS_DEFAULT),
+      : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
         memory_(nullptr),
         factory_(factory) {
@@ -356,7 +363,7 @@ class JSONReaderSample {
   void tree_traversal(
       json_node_sample<Initializer, InitializerFactory>* jnode) {
     json_node_sample<Initializer, InitializerFactory>* child;
-    // rj::Value *child_src;
+    // rjNValue *child_src;
     // обход дочерних элементов
     while ((child = jnode->NextChild()) != nullptr) {
       tree_traversal(child);
@@ -364,33 +371,8 @@ class JSONReaderSample {
   }
   /** \brief считать файл в память */
   void init_memory() {
-    std::ifstream fstr(source_->GetURL());
-    if (fstr) {
-      fstr.seekg(0, fstr.end);
-      len_memory_ = fstr.tellg();
-      fstr.seekg(0, fstr.beg);
-      if (len_memory_ > 0) {
-        memory_ = new char[len_memory_];
-        fstr.read(memory_, len_memory_);
-        if (!fstr) {
-          error_.SetError(ERROR_FILE_IN_ST,
-                          "File read error for: " + source_->GetURL());
-          Logging::Append(io_loglvl::err_logs,
-                          "ошибка чтения json файла: "
-                          "из " +
-                              std::to_string(len_memory_) + " байт считано " +
-                              std::to_string(fstr.gcount()));
-        }
-      } else {
-        // ошибка файла
-        error_.SetError(ERROR_FILE_IN_ST,
-                        "File length error for: " + source_->GetURL());
-      }
-    } else {
-      // ошибка открытия файла
-      error_.SetError(ERROR_FILE_EXISTS_ST,
-                      "File open error for: " + source_->GetURL());
-    }
+    const auto content = read_file(source_->GetURL(), error_);
+    init_memory(content.str().c_str());
   }
   /** \brief скопировать данные в память класса */
   void init_memory(const char* data) {
@@ -402,21 +384,20 @@ class JSONReaderSample {
   }
 
  private:
-  ErrorWrap error_;
-  mstatus_t status_ = STATUS_DEFAULT;
   /** \brief адрес файла */
-  file_utils::FileURL* source_ = nullptr;
+  file_utils::FileURLSample<PathT>* source_ = nullptr;
   /** \brief буффер памяти файла */
   char* memory_ = nullptr;
   /** \brief величина буффер памяти файла */
   size_t len_memory_ = 0;
   /** \brief основной json объект */
-  rj::Document document_;
+  rjNDocument document_;
   /** \brief корень json дерева
    * \note а в этом сетапе он наверное и не обязателен */
   std::unique_ptr<json_node_sample<Initializer, InitializerFactory>> root_node_;
   /** \brief фабрика создания нод json дерева */
   InitializerFactory* factory_;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__JSONREADER_H

@@ -9,16 +9,20 @@ if(${GTEST_FOUND})
   add_executable(${TARGET_UTILS_TESTS}
     ${PROJECT_ROOT}/source/Common.cpp
     ${PROJECT_ROOT}/source/ErrorWrap.cpp
-    ${PROJECT_ROOT}/source/FileURL.cpp
     ${PROJECT_ROOT}/source/Logging.cpp
     ${PROJECT_FULLTEST_DIR}/test_utils.cpp
     ${PROJECT_FULLTEST_DIR}/test_logging.cpp
     ${PROJECT_FULLTEST_DIR}/test_nullobject.cpp
   )
-  target_compile_features(${TARGET_UTILS_TESTS} PRIVATE cxx_std_17)
+  if(WIN32)
+    target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE OS_WINDOWS)
+  elseif(UNIX)
+    target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE OS_UNIX)
+  endif()
+  target_compile_features(${TARGET_UTILS_TESTS} PRIVATE cxx_std_20)
   target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE -DBYCMAKE_DEBUG)
   target_compile_options(${TARGET_UTILS_TESTS} PRIVATE
-      -fprofile-arcs -ftest-coverage -Wall)
+      -fprofile-arcs -ftest-coverage -fconcepts -Wall)
 
   target_include_directories(${TARGET_UTILS_TESTS}
     PRIVATE ${PROJECT_ROOT}/include

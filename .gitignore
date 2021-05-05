@@ -4,6 +4,7 @@ out/
 soft/
 
 .ccls-cache/
+.clangd/
 .vs/
 .vscode/
 

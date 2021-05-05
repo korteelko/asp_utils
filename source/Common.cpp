@@ -7,12 +7,14 @@
  * This library is distributed under the MIT License.
  * See LICENSE file in the project root for full license information.
  */
-#include "Common.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
 
-#include <algorithm>
-#include <filesystem>
+#include <cassert>
+#include <fstream>
 #include <map>
 
+namespace asp_utils {
 static std::map<io_loglvl, std::string> level_names = {{no_log, "no logs"},
                                                        {err_logs, "err"},
                                                        {warn_logs, "warn"},
@@ -36,8 +38,12 @@ std::string trim_str(const std::string& str) {
                    .base());
 }
 
+bool is_exists(const fs::path& path) {
+  return fs::exists(path);
+}
+
 bool is_exists(const std::string& path) {
-  return std::filesystem::exists(path);
+  return fs::exists(path);
 }
 
 std::string dir_by_path(const std::string& path) {
@@ -52,3 +58,15 @@ bool is_equal(std::complex<double> a, std::complex<double> b, double accur) {
   return is_equal(a.real(), b.real(), accur) &&
          is_equal(a.imag(), b.imag(), accur);
 }
+std::stringstream read_file(const fs::path& path, ErrorWrap& error) {
+  std::stringstream wss;
+  if (fs::exists(path)) {
+    std::ifstream wif(path);
+    wss << wif.rdbuf();
+  } else {
+    error.SetError(ERROR_FILE_EXISTS_ST,
+                   "File open error for: " + path.string());
+  }
+  return wss;
+}
+}  // namespace asp_utils

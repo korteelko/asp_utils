@@ -19,11 +19,21 @@ add_library(
   ${TARGET_UTILS_LIB}
   ${PROJECT_ROOT}/source/Common.cpp
   ${PROJECT_ROOT}/source/ErrorWrap.cpp
-  ${PROJECT_ROOT}/source/FileURL.cpp
   ${PROJECT_ROOT}/source/Logging.cpp
 )
 
 target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_20)
+if(MSVC)
+  target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC
+    _CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(WIN32)
+  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE OS_WINDOWS)
+elseif(UNIX)
+  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE OS_UNIX)
+  target_compile_options(${TARGET_UTILS_LIB} PUBLIC -fconcepts)
+endif()
 
 #   spdlog
 #   https://github.com/gabime/spdlog.git
@@ -31,7 +41,7 @@ add_subdirectory(${MODULES_DIR}/spdlog)
 target_include_directories(${TARGET_UTILS_LIB}
   PUBLIC ${PROJECT_ROOT}/include
   PRIVATE ${MODULES_DIR}/spdlog/include)
-
+  
 #   pugixml
 #   https://pugixml.org/
 if(WITH_PUGIXML)
@@ -56,7 +66,7 @@ endif()
 
 # build type
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE -D_DEBUG)
+  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE _DEBUG)
 endif()
 
 find_package(Threads REQUIRED)
@@ -79,14 +89,14 @@ if(BUILD_TESTS)
 endif()
 
 if(UNIX)
-# генерировать .json файл информации о компилируемых объектниках
-#   compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-# скопировать файл compile_commands.json в корень проекта, для работы
-#   синтаксических анализаторов, cppcheck и т.д.
-add_custom_target(
-  copy-compile-commands-asp_utils ALL
-  ${CMAKE_COMMAND} -E copy_if_different
-  ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_LIST_DIR})
+  # генерировать .json файл информации о компилируемых объектниках
+  #   compile_commands.json
+  set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+  # скопировать файл compile_commands.json в корень проекта, для работы
+  #   синтаксических анализаторов, cppcheck и т.д.
+  add_custom_target(
+    copy-compile-commands-asp_utils ALL
+    ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_LIST_DIR})
 endif()
 

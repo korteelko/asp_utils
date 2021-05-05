@@ -1,17 +1,18 @@
 #ifndef TESTS__UTILS__INODE_IMP_H
 #define TESTS__UTILS__INODE_IMP_H
 
-#include "Common.h"
-#include "ErrorWrap.h"
-#include "Readers/INode.h"
-#include "Readers/JSONReader.h"
-#include "Readers/XMLReader.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/Readers/INode.h"
+#include "asp_utils/Readers/JSONReader.h"
+#include "asp_utils/Readers/XMLReader.h"
 
 #include <iostream>
 #include <string>
 #include <type_traits>
 #include <vector>
 
+using namespace asp_utils;
 /*
 json:
 {
@@ -145,10 +146,10 @@ class json_test_node : public INodeInitializer {
 
  private:
   // static std::string getParameter(ReaderNodeT *src, const std::string &name);
-  static std::string getParameter(rj::Value* src, const std::string& name) {
+  static std::string getParameter(rjNValue* src, const std::string& name) {
     std::string value = "";
     if (src->HasMember(name.c_str())) {
-      rj::Value& par = src->operator[](name.c_str());
+      rjNValue& par = src->operator[](name.c_str());
       if (par.IsString()) {
         value = par.GetString();
       } else if (par.IsInt()) {

@@ -1,7 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "Common.h"
-#include "Logging.h"
+#include "asp_utils/Base.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/Logging.h"
+
+using namespace asp_utils;
 
 /**
  * \brief Пример имплементации интерфейса INullObject

@@ -10,8 +10,9 @@
 #ifndef UTILS__LOGGING_H
 #define UTILS__LOGGING_H
 
-#include "Common.h"
-#include "ErrorWrap.h"
+#include "asp_utils/Common.h"
+#include "asp_utils/ErrorWrap.h"
+#include "asp_utils/ThreadWrap.h"
 
 #include <fstream>
 #include <set>
@@ -20,7 +21,7 @@
 /**
  * \brief Дефолтное имя файла логов
  * */
-#define DEFAULT_LOGFILE "logs"
+#define DEFAULT_LOGFILE "logs.txt"
 /**
  * \brief Максимальный размер основного файла логов
  * */
@@ -30,6 +31,7 @@
  * */
 #define DEFAULT_FLUSH_RATE 3  // every 3 sec
 
+namespace asp_utils {
 /**
  * \brief Структура инициализирующая конфигурацию логгера
  * */
@@ -45,7 +47,7 @@ struct logging_cfg {
   /**
    * \brief Путь к файлу
    * */
-  std::string filepath = DEFAULT_LOGFILE;
+  fs::path filepath = DEFAULT_LOGFILE;
   /**
    * \brief Максимальный размер файла(в байтах)
    * */
@@ -71,7 +73,7 @@ struct logging_cfg {
    * */
   logging_cfg(const std::string& logger,
               io_loglvl ll,
-              const std::string& file,
+              const fs::path& file,
               size_t maxlen,
               uint16_t flush_rate,
               bool duplicate);
@@ -84,7 +86,7 @@ struct logging_cfg {
    * */
   logging_cfg(const std::string& logger,
               io_loglvl ll,
-              const std::string& file,
+              const fs::path& file,
               bool duplicate);
   logging_cfg(const logging_cfg& lc) = default;
   /**
@@ -164,7 +166,7 @@ class Logging {
   /**
    * \brief Имя файла логирования
    * */
-  static const char* GetLogFile();
+  static std::string GetLogFile();
 #if defined(_DEBUG)
   /**
    * \brief Вывести строку в стандартный вывод ошибок
@@ -301,5 +303,6 @@ class PrivateLogging {
    * */
   Mutex loggers_lock_;
 };
+}  // namespace asp_utils
 
 #endif  // !UTILS__LOGGING_H
