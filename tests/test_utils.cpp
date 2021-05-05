@@ -124,7 +124,7 @@ TEST(FileURL, Full_filesystem) {
   SetupURLSample<fs::path> setup(url_t::fs_path, td);
   EXPECT_EQ(setup.GetURLType(), url_t::fs_path);
   EXPECT_EQ(setup.GetFullPrefix(), td);
-  std::fstream file(td.native() + nstring_ctor(path_separator) + tf.native(), std::ios_base::out);
+  std::fstream file(td.string() + path_separator + tf.string(), std::ios_base::out);
   ASSERT_TRUE(file.is_open());
   file.close();
   FileURLRootSample<fs::path> uroot(setup);
@@ -137,7 +137,7 @@ TEST(FileURL, Full_filesystem) {
   #ifdef OS_UNIX
   EXPECT_EQ(ufile.GetURLStr(), "test_dir/test_file");
   #endif  // OS_UNIX
-  ufile.SetError(ERROR_FILE_OUT_ST, nstring_ctor("Тест ошибки"));
+  ufile.SetError(ERROR_FILE_OUT_ST, "Тест ошибки");
   EXPECT_TRUE(ufile.IsInvalidPath());
 
   EXPECT_TRUE(fs::remove_all(td));
