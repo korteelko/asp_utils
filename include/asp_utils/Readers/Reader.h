@@ -106,6 +106,10 @@ struct lib_node<pugi::xml_node> {
 
 #ifdef WITH_RAPIDJSON
 namespace rj = rapidjson;
+
+typedef rj::Value rjNValue;
+typedef rj::Document rjNDocument;
+
 /** \brief Представление узла json в rapudjson */
 template <>
 struct lib_node<rjNValue> {
