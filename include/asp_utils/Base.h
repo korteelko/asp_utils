@@ -28,22 +28,28 @@ struct BaseObject {
   /**
    * \brief Получить код ошибки
    * */
-  inline merror_t GetError() const { return error_.GetErrorCode(); }
+  merror_t GetError() const { return error_.GetErrorCode(); }
   /**
    * \brief Получить состояние объекта
    * */
-  inline mstatus_t GetStatus() const { return status_; }
+  mstatus_t GetStatus() const { return status_; }
   /**
    * \brief Установить код ошибки 'error' и сообщение ошибки 'msg'
    * */
-  inline void SetError(merror_t error, const std::string& msg) {
+  void SetError(merror_t error, const std::string& msg) {
     error_.SetError(error, msg);
     status_ = STATUS_HAVE_ERROR;
   }
   /**
+   * \brief Получить установленное сообщение ошибки
+   * */
+  std::string GetErrorMessage() const {
+    return error_.GetMessage();
+  }
+  /**
    * \brief Залогировать ошибки
    * */
-  inline void LogError() { error_.LogIt(); }
+  void LogError() { error_.LogIt(); }
 
  protected:
   mstatus_t status_;
