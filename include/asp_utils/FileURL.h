@@ -18,8 +18,10 @@
 #include "asp_utils/Common.h"
 #include "asp_utils/ErrorWrap.h"
 
+#include <cassert>
 #include <filesystem>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace asp_utils {
@@ -321,16 +323,26 @@ void FileURLRootSample<PathT>::check_fs_root() {
 template <PathType PathT>
 FileURLSample<PathT> FileURLRootSample<PathT>::set_fs_path(
     const PathT& relative_path) {
+  const auto concat_paths = [](auto&& prefix, const auto& relative) {
+    if constexpr (std::is_same<PathT, fs::path>::value)
+      return prefix / relative;
+    else if constexpr (std::is_same<PathT, std::string>::value)
+      return (fs::path(prefix) / fs::path(relative)).string();
+    assert(0 && "unavailable type PathT");
+    return PathT{};
+  };
   return FileURLSample<PathT>(
       setup_.GetURLType(),
-      (relative_path.is_absolute())
+      (is_absolute_path(relative_path))
           ? relative_path
-          : fs::path(setup_.GetFullPrefix()) / relative_path);
+          : concat_paths(setup_.GetFullPrefix(), relative_path));
 }
 
 template <PathType PathT>
 bool FileURLRootSample<PathT>::is_absolute_path(const PathT& path) {
-  return path.is_absolute();
+  if constexpr (std::is_same<PathT, fs::path>::value)
+    return path.is_absolute();
+  return fs::path(path).is_absolute();
 }
 
 // FileURLSample
