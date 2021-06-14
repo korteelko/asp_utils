@@ -103,6 +103,8 @@ class FileURLSample : public BaseObject {
   template <PathType PathT>
 #elif defined(OS_UNIX)
   template <class _PathT>
+#else
+#error undefined platform
 #endif  // OS_
   friend class FileURLRootSample;
 

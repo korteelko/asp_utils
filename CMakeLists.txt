@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.9)
 
 set(PROJECT_NAME asp_utils)
 project(${PROJECT_NAME})
+
 set(TARGET_UTILS_LIB ${PROJECT_NAME})
 
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(UTILS_CMAKE_ROOT ${PROJECT_ROOT}/cmake)
+
 set(SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(MODULES_DIR ${PROJECT_ROOT}/lib)
 
-message(STATUS "${PROJECT_NAME} build type: ${CMAKE_BUILD_TYPE}")
+include(${UTILS_CMAKE_ROOT}/env_setup.cmake)
 
 option(WITH_PUGIXML "Add `pugixml` api and examples" ON)
 option(WITH_RAPIDJSON "Add `rapidjson` api and examples" ON)
@@ -23,17 +26,8 @@ add_library(
 )
 
 target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_20)
-if(MSVC)
-  target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC
-    _CRT_SECURE_NO_WARNINGS)
-endif()
-
-if(WIN32)
-  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE OS_WINDOWS)
-elseif(UNIX)
-  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE OS_UNIX)
-  target_compile_options(${TARGET_UTILS_LIB} PUBLIC -fconcepts)
-endif()
+append_list_defines_system(SYSTEM_DEFINES_LIST)
+target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE ${SYSTEM_DEFINES_LIST})
 
 #   spdlog
 #   https://github.com/gabime/spdlog.git
@@ -47,7 +41,7 @@ target_include_directories(${TARGET_UTILS_LIB}
 if(WITH_PUGIXML)
   set(PUGIXML_DIR ${MODULES_DIR}/pugixml)
   target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC PUGIXML_HEADER_ONLY WITH_PUGIXML)
-  target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${PUGIXML_DIR}/src)
+  target_include_directories(${TARGET_UTILS_LIB} PUBLIC SYSTEM ${PUGIXML_DIR}/src)
   add_subdirectory(${PUGIXML_DIR})
 endif()
 
@@ -63,14 +57,13 @@ if(WITH_RAPIDJSON)
   add_subdirectory(${RAPIDJSON_DIR})
 endif()
 
-
 # build type
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE _DEBUG)
 endif()
 
 find_package(Threads REQUIRED)
-target_link_libraries(${TARGET_UTILS_LIB}
+target_link_libraries(${TARGET_UTILS_LIB} PRIVATE 
   Threads::Threads
   spdlog
 )
@@ -82,21 +75,11 @@ if(BUILD_EXAMPLES)
 endif()
 
 # run tests
-if(BUILD_TESTS)
+if(BUILD_TESTS AND UNIX)
   message(STATUS "Запускаем тесты ${PROJECT_NAME}")
   enable_testing()
   add_subdirectory(${PROJECT_ROOT}/tests)
 endif()
 
-if(UNIX)
-  # генерировать .json файл информации о компилируемых объектниках
-  #   compile_commands.json
-  set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-  # скопировать файл compile_commands.json в корень проекта, для работы
-  #   синтаксических анализаторов, cppcheck и т.д.
-  add_custom_target(
-    copy-compile-commands-asp_utils ALL
-    ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_CURRENT_LIST_DIR})
-endif()
+copy_compile_commands(${TARGET_UTILS_LIB})
 
