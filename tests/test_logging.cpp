@@ -3,7 +3,9 @@
 #include "asp_utils/Common.h"
 #include "asp_utils/Logging.h"
 
+#include <chrono>
 #include <filesystem>
+#include <thread>
 
 using namespace asp_utils;
 
@@ -33,14 +35,14 @@ TEST(Logging, Full) {
   std::stringstream sstr;
   sstr << "nologable error";
   Logging::Append(io_loglvl::debug_logs, sstr);
-  sleep(lcfg.flush_rate_sec + 1);
+  std::this_thread::sleep_for(std::chrono::seconds(lcfg.flush_rate_sec + 1));
   EXPECT_EQ(fs::file_size(lfile), 0);
   Logging::Append(sstr);
-  sleep(lcfg.flush_rate_sec + 1);
+  std::this_thread::sleep_for(std::chrono::seconds(lcfg.flush_rate_sec + 1));
   EXPECT_NE(fs::file_size(lfile), 0);
   Logging::ClearLogFile();
   Logging::Append(io_loglvl::err_logs, std::string("Логируемая ошибка"));
-  sleep(lcfg.flush_rate_sec + 1);
+  std::this_thread::sleep_for(std::chrono::seconds(lcfg.flush_rate_sec + 1));
   EXPECT_NE(fs::file_size(lfile), 0);
   /* логирование ошибки */
   Logging::ClearLogFile();
@@ -48,6 +50,6 @@ TEST(Logging, Full) {
   ErrorWrap ew(ERROR_FILE_LOGGING_ST, "Тест логирования ошибки");
   ew.LogIt(io_loglvl::err_logs);
   EXPECT_TRUE(ew.IsLogged());
-  sleep(lcfg.flush_rate_sec + 1);
+  std::this_thread::sleep_for(std::chrono::seconds(lcfg.flush_rate_sec + 1));
   EXPECT_NE(fs::file_size(lfile), 0);
 }

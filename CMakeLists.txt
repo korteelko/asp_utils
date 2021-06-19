@@ -25,9 +25,7 @@ add_library(
   ${PROJECT_ROOT}/source/Logging.cpp
 )
 
-target_compile_features(${TARGET_UTILS_LIB} PUBLIC cxx_std_20)
-append_list_defines_system(SYSTEM_DEFINES_LIST)
-target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE ${SYSTEM_DEFINES_LIST})
+add_system_defines(${TARGET_UTILS_LIB})
 
 #   spdlog
 #   https://github.com/gabime/spdlog.git
@@ -55,11 +53,6 @@ if(WITH_RAPIDJSON)
   target_include_directories(${TARGET_UTILS_LIB} PUBLIC ${RAPIDJSON_DIR}/include)
   target_compile_definitions(${TARGET_UTILS_LIB} PUBLIC WITH_RAPIDJSON)
   add_subdirectory(${RAPIDJSON_DIR})
-endif()
-
-# build type
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  target_compile_definitions(${TARGET_UTILS_LIB} PRIVATE _DEBUG)
 endif()
 
 find_package(Threads REQUIRED)

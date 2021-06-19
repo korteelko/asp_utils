@@ -3,7 +3,7 @@ set(TARGET_UTILS_TESTS asp_utils-fulltests)
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(PROJECT_FULLTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-find_package(GTest)
+find_package(GTest REQUIRED)
 if(${GTEST_FOUND})
   # utils tests
   add_executable(${TARGET_UTILS_TESTS}
@@ -14,13 +14,8 @@ if(${GTEST_FOUND})
     ${PROJECT_FULLTEST_DIR}/test_logging.cpp
     ${PROJECT_FULLTEST_DIR}/test_nullobject.cpp
   )
-  if(WIN32)
-    target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE OS_WINDOWS)
-  elseif(UNIX)
-    target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE OS_UNIX)
-  endif()
-  target_compile_features(${TARGET_UTILS_TESTS} PRIVATE cxx_std_20)
-  target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE -DBYCMAKE_DEBUG)
+  add_system_defines(${TARGET_UTILS_TESTS})
+  target_compile_definitions(${TARGET_UTILS_TESTS} PRIVATE BYCMAKE_DEBUG)
   target_compile_options(${TARGET_UTILS_TESTS} PRIVATE
       -fprofile-arcs -ftest-coverage -fconcepts -Wall)
 

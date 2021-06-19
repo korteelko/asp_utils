@@ -316,12 +316,13 @@ template <class NodeT,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
 class ReaderSample : public BaseObject {
-  ReaderSample(const ReaderSample&) = delete;
-  ReaderSample operator=(const ReaderSample&) = delete;
   typedef ReaderSample<NodeT, Initializer, InitializerFactory, PathT> Reader;
   typedef node_sample<NodeT, Initializer, InitializerFactory> node;
 
  public:
+  ReaderSample(const ReaderSample&) = delete;
+  ReaderSample operator=(const ReaderSample&) = delete;
+
   static ReaderSample<NodeT, Initializer, InitializerFactory, PathT>* Init(
       file_utils::FileURLSample<PathT>* source,
       InitializerFactory* factory = nullptr) {
