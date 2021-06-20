@@ -3,7 +3,7 @@ set(TARGET_UTILS_TESTS asp_utils-fulltests)
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(PROJECT_FULLTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-find_package(GTest REQUIRED)
+find_package(GTest)
 if(${GTEST_FOUND})
   # utils tests
   add_executable(${TARGET_UTILS_TESTS}

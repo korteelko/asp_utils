@@ -4,8 +4,10 @@ function(add_system_defines TARGET)
         target_compile_definitions(${TARGET} PRIVATE _CRT_SECURE_NO_WARNINGS)
     endif()
     if(WIN32)
+        message(TRACE "\t\t Set define 'OS_WINDOWS' for ${TARGET}")
         target_compile_definitions(${TARGET} PRIVATE OS_WINDOWS)
     elseif(UNIX)
+        message(TRACE "\t\t Set define 'OS_UNIX' for ${TARGET}")
         target_compile_definitions(${TARGET} PRIVATE OS_UNIX)
         target_compile_options(${TARGET} PRIVATE -fconcepts)
     else()
@@ -18,9 +20,9 @@ function(add_system_defines TARGET)
 endfunction()
 
 function(copy_compile_commands TARGET)
-    if(UNIX)
-        message(STATUS "\t\tGenerate compile_commands.json for ${TARGET}")
-        set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    message(TRACE "\t\tGenerate compile_commands.json for ${TARGET}")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    if(EXISTS ${CMAKE_BINARY_DIR}/compile_commands.json)
         add_custom_target(
                 copy-compile-commands-${TARGET} ALL
                 ${CMAKE_COMMAND} -E copy_if_different
