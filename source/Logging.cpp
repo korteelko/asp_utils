@@ -22,14 +22,12 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
+#include <cassert>
+#include <cstdarg>
 #include <ctime>
 #include <filesystem>
 #include <iostream>
 
-#include <assert.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
 
 namespace asp_utils {
 /* псевдонимы для пространтв имён spdlog */

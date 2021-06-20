@@ -16,14 +16,11 @@
 
 #include <algorithm>
 #include <complex>
+#include <cstdint>
 #include <filesystem>
 #include <iostream>
-#include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
-
-#include <stdint.h>
 
 #if defined(BYCMAKE_DEBUG)
 /** \brief Режим отладки */
@@ -148,7 +145,7 @@ inline bool is_status_ok(mstatus_t status) {
  * \return true если для всех аргументов is_status_ok = true
  * */
 template <class... Targs>
-inline bool is_status_ok(mstatus_t status, Targs... fargs) {
+bool is_status_ok(mstatus_t status, Targs... fargs) {
   return is_status_ok(status) && is_status_ok(fargs...);
 }
 /**

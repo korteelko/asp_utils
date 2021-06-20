@@ -15,8 +15,6 @@
 #include <string>
 #include <vector>
 
-#include <stdint.h>
-
 namespace asp_utils {
 template <class Initializer>
 class SimpleInitializerFactory {
@@ -53,14 +51,14 @@ public:
   virtual void SetSubnodesNames(inodes_vec *subnodes) = 0;
 
   /** \brief Инициализировать данные родительского узла */
-  void SetParentData(INodeInitializer &parent) { (void) parent; }
+  void SetParentData(INodeInitializer&) {}
 
 protected:
-  mstatus_t status_ = STATUS_DEFAULT;
+  mstatus_t status_{STATUS_DEFAULT};
   /** \brief уникальный идентификатор ноды */
   // node_id id_;
   /** \brief собственное имя ноды */
-  std::string name_;
+  std::string name_{""};
   /** \brief вектор имён поднод(подузлов)
     * \note по ним из класса парсера их можно инициализировать */
   inodes_vec subnodes_;

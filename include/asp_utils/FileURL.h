@@ -323,8 +323,6 @@ FileURLSample<PathT> FileURLRootSample<PathT>::set_fs_path(
       return prefix / relative;
     else if constexpr (std::is_same<PathT, std::string>::value)
       return (fs::path(prefix) / fs::path(relative)).string();
-    assert(0 && "unavailable type PathT");
-    return PathT{};
   };
   return FileURLSample<PathT>(
       setup_.GetURLType(),

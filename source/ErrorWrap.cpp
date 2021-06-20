@@ -19,6 +19,9 @@ ErrorWrap::ErrorWrap(merror_t error) : ErrorWrap(error, "") {}
 ErrorWrap::ErrorWrap(merror_t error, const std::string& msg)
     : error_(error), msg_(msg), is_logged_(false) {}
 
+ErrorWrap::ErrorWrap(merror_t error, std::string&& msg)
+    : error_(error), msg_(msg), is_logged_(false) {}
+
 merror_t ErrorWrap::SetError(merror_t error, const std::string& msg) {
   if (error_ && !is_logged_)
     LogIt();
@@ -43,13 +46,13 @@ void ErrorWrap::LogIt(io_loglvl lvl) {
   }
 }
 
-void ErrorWrap::LogIt(PrivateLogging& pl, io_loglvl lvl) {
+void ErrorWrap::LogIt(PrivateLogging& pl, io_loglvl lvl) const {
   pl.Append(lvl, CreateErrorMessage());
 }
 
 void ErrorWrap::LogIt(PrivateLogging& pl,
                       const std::string& logger,
-                      io_loglvl lvl) {
+                      io_loglvl lvl) const {
   pl.Append(lvl, logger, CreateErrorMessage());
 }
 

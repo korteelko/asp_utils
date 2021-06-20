@@ -16,9 +16,6 @@
 #include "asp_utils/Logging.h"
 #include "asp_utils/Readers/INode.h"
 
-#include "pugixml.hpp"
-
-#include <fstream>
 #include <functional>
 #include <memory>
 #include <string>
@@ -146,8 +143,8 @@ class xml_node_sample {
    *   id не связываются структуры стилей из отдельного файла
    *   с базовой иерархией из основного файла */
   void setParentData() {
-    for (auto& x : childs)
-      x->node_data_ptr->SetParentData(*node_data_ptr);
+    for (auto& child : childs)
+      child->node_data_ptr->SetParentData(*node_data_ptr);
   }
 
  private:
@@ -305,14 +302,12 @@ class XMLReaderSample : public BaseObject {
                   InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(source),
-        memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   XMLReaderSample(const char* data, InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
-        memory_(nullptr),
         factory_(factory) {
     init_memory(data);
   }

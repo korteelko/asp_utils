@@ -24,7 +24,6 @@
 #include "rapidjson/error/en.h"
 #endif  // WITH_RAPIDJSON
 
-#include <fstream>
 #include <functional>
 #include <memory>
 #include <string>
@@ -75,7 +74,7 @@ struct lib_node<pugi::xml_node> {
   lib_node(pugi::xml_node xn) : data(xn) {}
   lib_node(pugi::xml_node&& xn) : data(xn) {}
 
-  inline pugi::xml_node* GetNodePointer() {
+  pugi::xml_node* GetNodePointer() {
     return (data.empty()) ? nullptr : &data;
   }
 
@@ -189,7 +188,7 @@ class node_sample : public BaseObject {
   node_sample(lib_node<NodeT> src,
               InitializerFactory* factory,
               const std::string& name)
-      : BaseObject(STATUS_DEFAULT), node_(src), factory(factory), name_(name) {
+      : BaseObject(STATUS_DEFAULT), node_(src), name_(name), factory(factory) {
     init();
   }
 
@@ -237,8 +236,6 @@ class node_sample : public BaseObject {
   }
   /** \brief Получить NodeT исходник */
   const NodeT* GetSource() const { return node_.GetNodePointer(); }
-  /** \brief Получить код ошибки */
-  merror_t GetError() const { return error_.GetErrorCode(); }
 
  private:
   /** \brief Инициализировать данные ноды */
@@ -433,14 +430,12 @@ class ReaderSample : public BaseObject {
                InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(source),
-        memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   ReaderSample(const char* data, InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
-        memory_(nullptr),
         factory_(factory) {
     init_memory(data);
   }

@@ -200,19 +200,13 @@ template <class Initializer,
           class = typename std::enable_if<
               std::is_base_of<INodeInitializer, Initializer>::value>::type>
 class JSONReaderSample : public BaseObject {
-  JSONReaderSample(const JSONReaderSample&) = delete;
-  JSONReaderSample operator=(const JSONReaderSample&) = delete;
   typedef JSONReaderSample<Initializer, InitializerFactory, PathT> JSONReader;
   typedef json_node_sample<Initializer, InitializerFactory> json_node;
 
  public:
-  /** \brief callback функция инициализации элементов
-   * \note не нравится мне это. Лучше определить в
-   *   классе-параметре шаблона */
-  // typedef std::function<
-  //    std::vector<std::string> &(const rjNValue &, node_t *)> callback_f;
+  JSONReaderSample(const JSONReaderSample&) = delete;
+  JSONReaderSample operator=(const JSONReaderSample&) = delete;
 
- public:
   static JSONReaderSample<Initializer, InitializerFactory>* Init(
       file_utils::FileURLSample<PathT>* source,
       InitializerFactory* factory = nullptr) {
@@ -334,8 +328,6 @@ class JSONReaderSample : public BaseObject {
 
   merror_t GetErrorCode() const { return error_.GetErrorCode(); }
 
-  void LogError() { error_.LogIt(); }
-
   // typedef std::vector<std::string> TreePath;
   /* что-то я хз */
   // rjNValue &ValueByPath(const TreePath &) {assert(0);}
@@ -345,14 +337,12 @@ class JSONReaderSample : public BaseObject {
                    InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(source),
-        memory_(nullptr),
         factory_(factory) {
     init_memory();
   }
   JSONReaderSample(const char* data, InitializerFactory* factory)
       : BaseObject(STATUS_DEFAULT),
         source_(nullptr),
-        memory_(nullptr),
         factory_(factory) {
     init_memory(data);
   }

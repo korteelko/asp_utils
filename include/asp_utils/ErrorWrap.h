@@ -123,6 +123,7 @@ class ErrorWrap {
   ErrorWrap();
   explicit ErrorWrap(merror_t error);
   ErrorWrap(merror_t error, const std::string& msg);
+  ErrorWrap(merror_t error, std::string&& msg);
   /**
    * \brief Установить(хранить) код ошибки 'error'
    * \param Error код ошибки
@@ -154,10 +155,10 @@ class ErrorWrap {
    * если есть что логировать.
    * Установить 'is_logged_' в true
    * */
-  void LogIt(class PrivateLogging& pl, io_loglvl lvl = io_loglvl::err_logs);
+  void LogIt(class PrivateLogging& pl, io_loglvl lvl = io_loglvl::err_logs) const;
   void LogIt(class PrivateLogging& pl,
              const std::string& logger,
-             io_loglvl lvl = io_loglvl::err_logs);
+             io_loglvl lvl = io_loglvl::err_logs) const;
   /**
    * \brief Получить код ошибки
    * */
