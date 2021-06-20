@@ -82,6 +82,8 @@ struct SetupURLSample {
 };
 using SetupURL = SetupURLSample<std::string>;
 
+template <PathType PathT>
+class FileURLRootSample;
 /**
  * \brief Класс пути(м.б. обычный пути в файловой системе, урл,
  *   запрос к дб и т.п.)
@@ -97,16 +99,7 @@ using SetupURL = SetupURLSample<std::string>;
  * */
 template <PathType PathT>
 class FileURLSample : public BaseObject {
-  /* Здесь проблема и видимо с компилятором, но на clang для сравнения я ещё не
-   * пробовал, да и дефайнов таких не заводил пока */
-#if defined(OS_WINDOWS)
-  template <PathType PathT>
-#elif defined(OS_UNIX)
-  template <class _PathT>
-#else
-#error undefined platform
-#endif  // OS_
-  friend class FileURLRootSample;
+  friend class FileURLRootSample<PathT>;
 
  public:
   /**
